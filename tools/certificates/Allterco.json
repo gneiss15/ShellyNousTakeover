@@ -1,0 +1,8 @@
+{
+  "version": "1.00",
+  "subject": "O = Allterco",
+  "source": "Public X.509 CA extracted from shelly_cloud.pem in fs_0 of two byte-identical original-device flash dumps; no private keys",
+  "sha256": "a11892e73b2c8922553c80384e123bd481270bf72d63eb491b061fc4bbf20421",
+  "scope": "Only the explicit stock HTTPS downloader; no system/browser trust installation",
+  "valid_until": "2030-08-02T12:03:41Z"
+}

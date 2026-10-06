@@ -1,0 +1,15 @@
+generated/
+.tools/
+__pycache__/
+*.pyc
+build*/
+*.bin
+*.zip
+*.elf
+*.map
+*.key
+*.pem
+Secrets.local.json
+
+# Local development history; public open work is maintained in TODO.md.
+/ToDo.txt

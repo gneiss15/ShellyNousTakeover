@@ -1,0 +1,72 @@
+{
+  "version": "1.00",
+  "device": "NOUS A8T",
+  "chip": "ESP32",
+  "flash_bytes": 4194304,
+  "observed_tasmota": {
+    "version": "14.3.0.1",
+    "variant": "tasmota32",
+    "build": "2024-11-05T10:09:04",
+    "source": "Archived Part 16 console log; firmware version fields in ESP descriptor are empty"
+  },
+  "bootloader": {
+    "offset": 4096,
+    "span": 28672,
+    "image_bytes": 16464,
+    "image_sha256": "2b22c5151072a667c16097939d84f5062b350e2c9b2b94e297f95057fc19744f",
+    "span_sha256": "52317911a2b78a4c95b6b18b392b0baefa814cae22783eb277bda1832dda395d",
+    "chip_id": 0,
+    "flash_mode": "DIO",
+    "checksum_verified": true,
+    "appended_digest_verified": true,
+    "erased_tail_verified": true
+  },
+  "partition_table": {
+    "offset": 32768,
+    "span": 4096,
+    "span_sha256": "619e5a9b645198b25d04949997221f587776965dfd13cbceddf9862c53e655c1",
+    "md5_verified": true,
+    "partitions": [
+      {
+        "name": "nvs",
+        "type": 1,
+        "subtype": 2,
+        "offset": 36864,
+        "size": 20480
+      },
+      {
+        "name": "otadata",
+        "type": 1,
+        "subtype": 0,
+        "offset": 57344,
+        "size": 8192
+      },
+      {
+        "name": "safeboot",
+        "type": 0,
+        "subtype": 0,
+        "offset": 65536,
+        "size": 851968
+      },
+      {
+        "name": "app0",
+        "type": 0,
+        "subtype": 16,
+        "offset": 917504,
+        "size": 2949120
+      },
+      {
+        "name": "spiffs",
+        "type": 1,
+        "subtype": 130,
+        "offset": 3866624,
+        "size": 327680
+      }
+    ]
+  },
+  "scope": "One observed original baseline; not blanket approval of all Tasmota versions >=12",
+  "sources": [
+    "https://tasmota.github.io/docs/Safeboot/"
+  ],
+  "contains_vendor_binaries": false
+}

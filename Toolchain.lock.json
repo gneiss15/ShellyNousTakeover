@@ -1,0 +1,25 @@
+{
+  "version": "1.00",
+  "sdk": {
+    "repository": "https://github.com/espressif/esp-idf.git",
+    "tag": "v5.5.1",
+    "commit": "fcae32885b0296b32044cb99ecbdc50d98dddb83",
+    "tools_manifest_sha256": "5c6a0453a9af7ee382681dab98ab9a3c51920cc68b57038d35848b0f08bc2793"
+  },
+  "compilers": {
+    "shelly": {
+      "package": "riscv32-esp-elf",
+      "version": "esp-14.2.0_20241119",
+      "directory": "riscv32-esp-elf",
+      "executable": "riscv32-esp-elf-gcc"
+    },
+    "nous": {
+      "package": "xtensa-esp-elf",
+      "version": "esp-14.2.0_20241119",
+      "directory": "xtensa-esp-elf",
+      "executable": "xtensa-esp32-elf-gcc"
+    }
+  },
+  "source": "https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/get-started/linux-macos-setup.html",
+  "python_dependencies": "Installed by the pinned SDK using its version-specific requirements/constraints; not a full Python package lock"
+}

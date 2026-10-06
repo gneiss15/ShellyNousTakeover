@@ -1,0 +1,237 @@
+{
+  "version": "1.02",
+  "hardware_tested": false,
+  "candidate_transport_authenticated": true,
+  "candidate_url": "https://fwcdn.shelly.cloud/gen2-ntest/PlugMG3/308731335996c584762969681b14d2c6dc6c917dada6cf25cc6aa1a595b50391",
+  "checks": {
+    "zip_crc": "passed",
+    "manifest_component_sizes_and_digests": "passed",
+    "esp_image_chip_dio_checksum_digest": "passed",
+    "actual_bootstate_decoder_both_copies": "passed",
+    "partition_geometry_identical": true
+  },
+  "components": {
+    "PlugMG3.bin": {
+      "identical": false,
+      "baseline_bytes": 2708368,
+      "candidate_bytes": 2712352
+    },
+    "boot_state.bin": {
+      "identical": false,
+      "baseline_bytes": 8192,
+      "candidate_bytes": 8192
+    },
+    "bootloader.bin": {
+      "identical": true,
+      "baseline_bytes": 20384,
+      "candidate_bytes": 20384
+    },
+    "fs.img": {
+      "identical": false,
+      "baseline_bytes": 917504,
+      "candidate_bytes": 917504
+    },
+    "manifest.json": {
+      "identical": false,
+      "baseline_bytes": 1312,
+      "candidate_bytes": 1312
+    },
+    "partition-table.bin": {
+      "identical": true,
+      "baseline_bytes": 4096,
+      "candidate_bytes": 4096
+    }
+  },
+  "baseline": {
+    "version": "2.0.0",
+    "build_id": "20260710-101147/2.0.0-g87fbfa4",
+    "package_digest_matches_url": true,
+    "boot_states": [
+      {
+        "Sequence": 2607100000,
+        "ActiveSlot": 0,
+        "ReserveSlot": 1,
+        "BootAttempts": 0,
+        "Committed": 1,
+        "Mfs": 0,
+        "Valid": true
+      },
+      {
+        "Sequence": 2607100000,
+        "ActiveSlot": 0,
+        "ReserveSlot": 1,
+        "BootAttempts": 0,
+        "Committed": 1,
+        "Mfs": 0,
+        "Valid": true
+      }
+    ],
+    "partitions": [
+      {
+        "label": "otadata",
+        "type": 1,
+        "subtype": 0,
+        "offset": 69632,
+        "size": 8192,
+        "flags": 1
+      },
+      {
+        "label": "nvs",
+        "type": 1,
+        "subtype": 2,
+        "offset": 81920,
+        "size": 49152,
+        "flags": 0
+      },
+      {
+        "label": "app_0",
+        "type": 0,
+        "subtype": 16,
+        "offset": 131072,
+        "size": 2752512,
+        "flags": 1
+      },
+      {
+        "label": "fs_0",
+        "type": 1,
+        "subtype": 130,
+        "offset": 2883584,
+        "size": 917504,
+        "flags": 1
+      },
+      {
+        "label": "app_1",
+        "type": 0,
+        "subtype": 17,
+        "offset": 3801088,
+        "size": 2752512,
+        "flags": 1
+      },
+      {
+        "label": "fs_1",
+        "type": 1,
+        "subtype": 130,
+        "offset": 6553600,
+        "size": 917504,
+        "flags": 1
+      },
+      {
+        "label": "scratch",
+        "type": 1,
+        "subtype": 128,
+        "offset": 8257536,
+        "size": 65536,
+        "flags": 1
+      },
+      {
+        "label": "shelly",
+        "type": 1,
+        "subtype": 136,
+        "offset": 8323072,
+        "size": 65536,
+        "flags": 1
+      }
+    ]
+  },
+  "candidate": {
+    "version": "2.0.1",
+    "build_id": "20260923-075548/2.0.1-ge1a198b",
+    "package_digest_matches_url": true,
+    "boot_states": [
+      {
+        "Sequence": 2609230000,
+        "ActiveSlot": 0,
+        "ReserveSlot": 1,
+        "BootAttempts": 0,
+        "Committed": 1,
+        "Mfs": 0,
+        "Valid": true
+      },
+      {
+        "Sequence": 2609230000,
+        "ActiveSlot": 0,
+        "ReserveSlot": 1,
+        "BootAttempts": 0,
+        "Committed": 1,
+        "Mfs": 0,
+        "Valid": true
+      }
+    ],
+    "partitions": [
+      {
+        "label": "otadata",
+        "type": 1,
+        "subtype": 0,
+        "offset": 69632,
+        "size": 8192,
+        "flags": 1
+      },
+      {
+        "label": "nvs",
+        "type": 1,
+        "subtype": 2,
+        "offset": 81920,
+        "size": 49152,
+        "flags": 0
+      },
+      {
+        "label": "app_0",
+        "type": 0,
+        "subtype": 16,
+        "offset": 131072,
+        "size": 2752512,
+        "flags": 1
+      },
+      {
+        "label": "fs_0",
+        "type": 1,
+        "subtype": 130,
+        "offset": 2883584,
+        "size": 917504,
+        "flags": 1
+      },
+      {
+        "label": "app_1",
+        "type": 0,
+        "subtype": 17,
+        "offset": 3801088,
+        "size": 2752512,
+        "flags": 1
+      },
+      {
+        "label": "fs_1",
+        "type": 1,
+        "subtype": 130,
+        "offset": 6553600,
+        "size": 917504,
+        "flags": 1
+      },
+      {
+        "label": "scratch",
+        "type": 1,
+        "subtype": 128,
+        "offset": 8257536,
+        "size": 65536,
+        "flags": 1
+      },
+      {
+        "label": "shelly",
+        "type": 1,
+        "subtype": 136,
+        "offset": 8323072,
+        "size": 65536,
+        "flags": 1
+      }
+    ]
+  },
+  "decision": "Exact 2.0.0/2.0.1 stock identities accepted by PC and app guards. Pinned update/download target now 2.0.1. Public device CA bundled for downloader only; host tests and Shelly build passed; new full device migration still not hardware tested.",
+  "authentication": {
+    "trust_source": "Public Allterco certificate extracted from shelly_cloud.pem in two byte-identical 8 MiB device dumps; trusted original-device provenance",
+    "descriptor_tls_verified": true,
+    "package_tls_verified": true,
+    "hostname_verification": true,
+    "package_matches_previously_analyzed_bytes": true,
+    "public_ca_local_path": "generated/StockCertificates/Allterco.pem",
+    "system_trust_modified": false
+  }
+}

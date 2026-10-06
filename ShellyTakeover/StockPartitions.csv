@@ -1,0 +1,10 @@
+# PlugMG3 stock 2.0.0 partition table. Must remain byte/geometry compatible with stock.
+# Name,    Type, SubType, Offset,   Size,      Flags
+otadata,   data, ota,     0x11000, 0x02000,   encrypted
+nvs,       data, nvs,     0x14000, 0x0C000,
+app_0,     app,  ota_0,   0x20000, 0x2A0000,  encrypted
+fs_0,      data, 0x82,    0x2C0000,0x0E0000,  encrypted
+app_1,     app,  ota_1,   0x3A0000,0x2A0000,  encrypted
+fs_1,      data, 0x82,    0x640000,0x0E0000,  encrypted
+scratch,   data, 0x80,    0x720000,0x80000,   encrypted
+shelly,    data, 0x88,    0x7F0000,0x10000,   encrypted

@@ -1,0 +1,24 @@
+{
+  "version": "1.01",
+  "model": "S3PL-30110EU",
+  "app": "PlugMG3",
+  "target": {
+    "version": "2.0.1",
+    "build_id": "20260923-075548/2.0.1-ge1a198b",
+    "url": "https://fwcdn.shelly.cloud/gen2-ntest/PlugMG3/308731335996c584762969681b14d2c6dc6c917dada6cf25cc6aa1a595b50391"
+  },
+  "allowed_sources": [
+    {
+      "version": "1.8.99-plugmg3prod0",
+      "build_id": "20251209-070625/geeb7eab"
+    }
+  ],
+  "downgrade_supported": false,
+  "scope": "Exact 2.0.0 and 2.0.1 stock identities; pinned factory update to 2.0.1, package/host checked, new device path not hardware tested",
+  "accepted_stock": [
+    {
+      "version": "2.0.0",
+      "build_id": "20260710-101147/2.0.0-g87fbfa4"
+    }
+  ]
+}

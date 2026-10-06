@@ -1,0 +1,105 @@
+{
+  "name": "PlugMG3",
+  "model": "S3PL-30110EU",
+  "platform": "esp32c3",
+  "version": "2.0.1",
+  "build_id": "20260923-075548/2.0.1-ge1a198b",
+  "package_sha256": "308731335996c584762969681b14d2c6dc6c917dada6cf25cc6aa1a595b50391",
+  "bootloader": {
+    "offset": 0,
+    "size": 20384,
+    "sha256": "7abe224c058701ec3817c430f012142f1c1b72545c148c94fd8116611ba7c49e",
+    "encrypt": true
+  },
+  "partition_table": {
+    "offset": 65536,
+    "size": 4096,
+    "sha256": "7f229151f235785a9169b47c2e6884d5c49d584b626b18b31cdf5e1c21a85bc2",
+    "encrypt": true
+  },
+  "partitions": [
+    {
+      "label": "otadata",
+      "type": 1,
+      "subtype": 0,
+      "offset": 69632,
+      "size": 8192,
+      "flags": 1
+    },
+    {
+      "label": "nvs",
+      "type": 1,
+      "subtype": 2,
+      "offset": 81920,
+      "size": 49152,
+      "flags": 0
+    },
+    {
+      "label": "app_0",
+      "type": 0,
+      "subtype": 16,
+      "offset": 131072,
+      "size": 2752512,
+      "flags": 1
+    },
+    {
+      "label": "fs_0",
+      "type": 1,
+      "subtype": 130,
+      "offset": 2883584,
+      "size": 917504,
+      "flags": 1
+    },
+    {
+      "label": "app_1",
+      "type": 0,
+      "subtype": 17,
+      "offset": 3801088,
+      "size": 2752512,
+      "flags": 1
+    },
+    {
+      "label": "fs_1",
+      "type": 1,
+      "subtype": 130,
+      "offset": 6553600,
+      "size": 917504,
+      "flags": 1
+    },
+    {
+      "label": "scratch",
+      "type": 1,
+      "subtype": 128,
+      "offset": 8257536,
+      "size": 65536,
+      "flags": 1
+    },
+    {
+      "label": "shelly",
+      "type": 1,
+      "subtype": 136,
+      "offset": 8323072,
+      "size": 65536,
+      "flags": 1
+    }
+  ],
+  "parts": {
+    "otadata": {
+      "size": 8192,
+      "sha256": "442633e9a6c77556e479f0b8fde4c188d5a0a38d846aec2c7b8ce2549a0442a4",
+      "encrypt": true
+    },
+    "app": {
+      "partition": "app_0",
+      "size": 2712352,
+      "sha256": "82f71b5db76025617ef0f12966dfcd9b0c7af765adf9a114615dd32b41efaeef",
+      "encrypt": true
+    },
+    "fs": {
+      "partition": "fs_0",
+      "size": 917504,
+      "sha256": "c5d30969f21ea9c5d4c873ef5b6d2caf4d598c32114ca6239745cb34b05b89ea",
+      "encrypt": true
+    }
+  }
+}

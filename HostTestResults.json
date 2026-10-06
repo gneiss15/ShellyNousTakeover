@@ -1,0 +1,38 @@
+{
+  "version": "1.11",
+  "hardware_tested": false,
+  "tests": {
+    "rescue_readback_and_main_guard": "passed: actual functions with host mocks and real SHA256",
+    "loader_writer": "passed: 30 fault points, rollback, repair, invariants",
+    "dual_layout_selection": "passed: actual detector and geometry mutations",
+    "migration_4mib": "passed: 2653 stage, 1962 commit, 1305 rollback fault positions",
+    "migration_8mib": "passed: 5741 stage, 4074 commit, 3257 rollback fault positions; actual writer, real SHA256",
+    "secrets_example": "valid JSON; override priority tested with synthetic values",
+    "boot_selection": "passed: 19 metadata cases, key override, no writes",
+    "stock_request": "passed: both copies, six failure phases, preservation and no-op; synthetic SH0S",
+    "automatic_flow": "passed: actual Shelly/Nous order and phase assertions, each step failure, uncertainty and rollback",
+    "shelly_app_guard": "passed: actual Guard compiled with hardware/flash mocks; both pinned Stock image size/digest pairs accepted, neither/unknown rejected; other guards preserved",
+    "shelly_platform_adapters": "passed: actual action adapters; rollback order and blocked uncertain states",
+    "manufacturer_package": "passed: current image/payload/routing/blank FS/integrity; tampered package cases rejected",
+    "nous_loader_writer": "passed: actual writer, 34 normal and 22 rollback API fault positions, partial erase/write, seven corrupt readbacks, Rescue/identity gates, metadata and bounds",
+    "nous_automatic_platform": "passed: actual platform and writer, real SHA256/synthetic flash, guards without writes, partial Rescue writes, loader block failures, OTA rollback and preservation; SDK image validation mocked",
+    "rescue_status": "passed: actual status route with SDK/socket mocks; JSON, identity, geometry, boot, MainReady, error and response bounds",
+    "nous_pc": "passed: seven tests, read-only guards, one-shot upload, lost response, same-MAC Rescue, blocked image and timeout; synthetic responses",
+    "shelly_pc": "passed: nine host tests including uptime reader, configurable DeviceType and mismatch rejection, factory-slot gating and one-shot/loopback flows",
+    "stock_preparation": "passed: thirteen host tests including 120-second continuous app_0/uptime observation; restart, transport failure, wrong slot/build and invalid/frozen uptime block or restart readiness; no manufacturer commit flag claimed",
+    "official_stock_package": "passed: existing official package identity/components/partition layout verified; reused in ignored cache",
+    "toolchain": "passed: actual --install with absent SDK/tools in new directories; official clone/submodules/downloads, pinned identity verification, fresh SDK Python environment, complete Shelly and Nous builds from source-only copy; both output sets/signatures/image geometry verified",
+    "explicit_environment": "passed: setup/check reject missing TAKEOVER variables despite installed tools",
+    "shelly_device_type_package": "passed: current rebuilt manufacturer package plus embedded Rescue snapshot/type checked; mismatched, malformed and empty environment selections rejected offline before any device action",
+    "mini_examples": "passed: both ESP-IDF builds, exact MiniMain descriptor/ESP chip/checksum/digest/SDK table offset and signed firmware verified; no hardware upload or runtime test"
+  },
+  "device_test_availability": {
+    "nous": "No fresh unit; four prior migrations tested the previous implementation, not this project",
+    "shelly": "Only the fourth, not yet migrated unit is available for a later fresh-device test"
+  },
+  "network_checks": {
+    "stock_https": "passed: actual StockFirmware.py downloaded pinned 2.0.1 using bundled original-device public Allterco CA with certificate and hostname verification; full official package validated; no TLS bypass",
+    "hardware_actions": "none",
+    "stock_http": "User reports NoSuchKey; independent read-only HTTP request closed without response. URL availability unresolved; no HTTP package fallback."
+  }
+}

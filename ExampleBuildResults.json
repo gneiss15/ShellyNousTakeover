@@ -1,0 +1,24 @@
+{
+  "version": "1.00",
+  "date": "2026-10-05",
+  "results": {
+    "ShellyTakeover": {
+      "binary_bytes": 780656,
+      "descriptor_project": "MiniMain",
+      "device_type": "TmrSwShellyC3V1",
+      "image_chip_digest_sdk_checked": true,
+      "signature_checked": true,
+      "hardware_tested": false,
+      "uploaded": false
+    },
+    "NousTakeover": {
+      "binary_bytes": 750080,
+      "descriptor_project": "MiniMain",
+      "device_type": "TakeoverNousA8TV1",
+      "image_chip_digest_sdk_checked": true,
+      "signature_checked": true,
+      "hardware_tested": false,
+      "uploaded": false
+    }
+  }
+}

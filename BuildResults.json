@@ -1,0 +1,118 @@
+{
+  "version": "1.07",
+  "hardware_tested": false,
+  "results": [
+    {
+      "target": "ShellyTakeover",
+      "component": "Rescue",
+      "bytes": 767232,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "clean_source_build_bytes": 767232,
+      "clean_source_build_passed": true,
+      "stock_guard_build": "exact 2.0.0 and 2.0.1 image digests; compiled/linked, not hardware tested",
+      "fresh_toolchain_build_passed": true,
+      "hardware_tested": false
+    },
+    {
+      "target": "ShellyTakeover",
+      "component": "Bootloader",
+      "bytes": 23392,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "clean_source_build_bytes": 23392,
+      "clean_source_build_passed": true,
+      "stock_guard_build": "exact 2.0.0 and 2.0.1 image digests; compiled/linked, not hardware tested",
+      "fresh_toolchain_build_passed": true,
+      "hardware_tested": false
+    },
+    {
+      "target": "NousTakeover",
+      "component": "Rescue",
+      "bytes": 738944,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "clean_source_build_bytes": 738944,
+      "clean_source_build_passed": true,
+      "fresh_toolchain_build_passed": true,
+      "hardware_tested": false
+    },
+    {
+      "target": "NousTakeover",
+      "component": "Bootloader",
+      "bytes": 27760,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "clean_source_build_bytes": 27760,
+      "clean_source_build_passed": true,
+      "fresh_toolchain_build_passed": true,
+      "hardware_tested": false
+    },
+    {
+      "target": "ShellyTakeover",
+      "component": "AutomaticTakeoverApp",
+      "bytes": 1602672,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "payloads_embedded_checked": true,
+      "manufacturer_package_checked": true,
+      "clean_source_build_bytes": 1602576,
+      "clean_source_build_passed": true,
+      "stock_guard_build": "exact 2.0.0 and 2.0.1 image digests; compiled/linked, not hardware tested",
+      "fresh_toolchain_build_passed": true,
+      "hardware_tested": false
+    },
+    {
+      "target": "NousTakeover",
+      "component": "AutomaticTakeoverApp",
+      "bytes": 1545824,
+      "chip_checked": true,
+      "image_checksum_checked": true,
+      "sdk_table_offset_checked": true,
+      "payloads_embedded_checked": true,
+      "hardware_tested": false,
+      "clean_source_build_bytes": 1545808,
+      "clean_source_build_passed": true,
+      "fresh_toolchain_build_passed": true
+    }
+  ],
+  "component_compile_checks": [
+    {
+      "target": "NousTakeover",
+      "component": "LoaderWriter",
+      "sdk": "ESP-IDF 5.5.1",
+      "chip": "ESP32",
+      "compile_and_link_passed": true,
+      "automatic_app_completed": false,
+      "hardware_tested": false
+    }
+  ],
+  "clean_source_build": {
+    "date": "2026-10-05",
+    "both_targets": "passed: complete BuildTakeover.sh from source-only temporary copy, external installed SDK/tools and private configuration; no reused generated artifacts",
+    "image_checks": "VerifyBuild.py passed for both loaders/Rescues; build-time manufacturer package and Nous image checks passed; Rescue signatures verified",
+    "fresh_tool_installation_tested": true,
+    "hardware_tested": false
+  },
+  "fresh_toolchain_test": {
+    "date": "2026-10-05",
+    "started_with_missing_sdk_and_tools": true,
+    "existing_tools_reused": false,
+    "source_copy_without_generated": true,
+    "setup_install": "passed",
+    "sdk_commit_manifest_submodules_compilers": "passed",
+    "sdk_python_environment": "passed",
+    "shelly_complete_build": "passed",
+    "nous_complete_build": "passed",
+    "rescue_signatures": "passed",
+    "payloads_and_manufacturer_artifacts": "passed",
+    "verify_build_images_and_geometry": "passed",
+    "artifacts_copied_to_project_generated": true,
+    "hardware_tested": false
+  }
+}
