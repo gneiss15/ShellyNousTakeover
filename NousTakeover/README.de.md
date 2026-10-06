@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # NousTakeover
 
-Version: 1.07
+Version: 1.09
 
 Bootloader, Rescue und automatische Takeover-App sind eigenständige ESP-IDF-Projekte.
 Environment und private Konfiguration: [Haupt-README](../README.de.md). Nach deren
@@ -15,7 +15,7 @@ bash tools/BuildTakeover.sh nous
 Ausgabe ist `generated/NousTakeover/App/Takeover.bin` für den Tasmota-SafeBoot-
 Herstellerupload. Dieses Eingangsformat ist das rohe ESP-App-Image; spätere Rescue-
 Uploads verlangen signierte Artefakte. Das Buildskript führt keinen Geräteupload aus.
-Ablauf und offene Tests: [Design](../Design.de.md) und [TODO](../TODO.de.md).
+Installation siehe unten; offene Tests: [TODO](../TODO.de.md).
 
 ## Artefaktinhalt und Installation
 
@@ -68,9 +68,12 @@ Wiederherstellung der ursprünglichen Tasmota oder ihrer alten SafeBoot-App.
 
 Die PC-Vorprüfung und der einmalige SafeBoot-Upload sind in `tools/NousTakeover.py`
 implementiert; Bedienung im Projekt-README. Die abschließende Prüfung verlangt den
-neuen Rescue-Status einschließlich unveränderter Geräte-MAC. Die PC-Schnittstellen
-sind hostgeprüft; ohne frischen NOUS wurde der neue Gesamtweg nicht am Gerät geprüft.
-Keine Gerätefreigabe allein aus dem Build oder den Hosttests ableiten.
+neuen Rescue-Status einschließlich unveränderter Geräte-MAC. Mit dem früheren Migrationsverfahren habe ich vier NOUS A8T erfolgreich übernommen.
+Die letzte, eigenständige Implementierung dieses Repositories wurde gebaut und
+hostgeprüft; nur dieser neue Gesamtpfad ist noch nicht an einem unveränderten Gerät
+getestet, da alle vier verfügbaren NOUS bereits umgestellt sind. Die bisherigen
+Erfolge sind praktische Erfahrungen mit dem Vorgänger, kein Gerätetest dieser
+letzten Implementierung.
 
 ## Unterstützte Eingangsbasis
 

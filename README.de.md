@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Version: 1.16
+Version: 1.20
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -12,6 +12,12 @@ passende Haupt-App über die Rescue installiert werden.
 **Entwicklungsstand:** Die Shelly-Übernahme bis zum verifizierten Rescue-Start wurde
 am frischen Gerät durchgeführt. Der genaue Testumfang steht in
 [HardwareTestResults.json](HardwareTestResults.json), der Arbeitsstand in [TODO.de.md](TODO.de.md).
+
+Mit dem früheren NOUS-A8T-Migrationsverfahren habe ich vier Geräte erfolgreich übernommen. Die neue, eigenständige NOUS-Implementierung dieses Repositories wurde gebaut und hostgeprüft, aber dieser letzte Gesamtpfad noch nicht an einem unveränderten Gerät getestet: Meine vier NOUS sind bereits umgestellt. Der offene Gerätetest betrifft somit diese Implementierungsversion; die NOUS-Übernahme wurde mit dem früheren Verfahren bereits erfolgreich durchgeführt.
+
+## Rückmeldungen willkommen
+
+Ich freue mich ausdrücklich über Rückmeldungen: Erfahrungen mit unterstützten Geräten, Probleme, unklare Anleitungen und Verbesserungsvorschläge. Bitte dafür die [GitHub Issues](https://github.com/gneiss15/ShellyNousTakeover/issues) nutzen. Bei technischen Rückmeldungen helfen Gerätemodell, ursprüngliche Firmware-Version/Build, der betroffene Schritt und die Fehlermeldung. Auch erfolgreiche Tests sind willkommen. Vor dem Teilen von Logs oder Anhängen WLAN-Zugangsdaten, Passwörter und private Schlüssel entfernen.
 
 ## Lizenz
 
@@ -319,6 +325,16 @@ Optional vorhandene Web-Anmeldung über SHELLY_USER/SHELLY_PASSWORD bzw.
 NOUS_USER/NOUS_PASSWORD setzen; Standardbenutzer ist admin. Passwörter nicht in
 Projektdateien oder Kommandozeilenargumenten ablegen. Skripte geben keine vollständigen
 Geräteantworten oder Authentifizierungsdaten aus. Rescue-Status: GET /status, rein lesend.
+
+## Migrationsprüfungen und Bootloader
+
+Vor dem Schreiben prüft Takeover Hardware/Security, Original-Bootloader, Partitionstabelle, laufende App und eingebettete Payloads. Die Webdiagnose startet vor diesen Prüfungen und bleibt bei Fehlern erreichbar. Jeder Migrations-Schreibvorgang wird rückgelesen und geprüft; Rücknahme setzt eine bestätigte Ausgangsbasis und einen eindeutigen Schreibzustand voraus. Die originale Firmware prüft der PC vor dem Upload, da die laufende Takeover deren Version nicht aus ihrer eigenen Version ableiten kann.
+
+Der Shelly-Dual-Bootloader bleibt der finale Bootloader und unterstützt die originale sowie die migrierte Partitionstabelle. Ein späterer Bootloader-Austausch ist nicht erforderlich. Die dokumentierten Build- und Migrationsskripte verwenden; generisches `idf.py flash` kann die benötigte Partitionierung oder Rescue überschreiben. Das Repository baut unabhängig von den älteren Prjs-Projektbäumen.
+
+Beim Shelly installiert Stock-OTA zuerst Takeover und deren leeres Dateisystem. Takeover prüft und schreibt bei Bedarf den finalen Bootloader, bereitet Rescue und NVS-/OTA-Metadaten vor, schreibt die neue Partitionstabelle und startet Rescue. Beim NOUS schreibt und prüft Takeover zuerst Rescue, danach Bootloader und Rescue-Bootauswahl; die unterstützte Partitionstabelle bleibt unverändert.
+
+Nach geprüftem Rescue-Start ist die Übernahme abgeschlossen und Main gilt als leer. Rescue bietet keinen Stock-Rollback-Service. Die Migrationsrücknahme beschränkt sich auf Fehler vor diesem Abschluss und die für das jeweilige Gerät verfügbaren geprüften Daten; sie garantiert keine Wiederherstellung der originalen Hersteller-Firmware.
 
 ## Struktur
 

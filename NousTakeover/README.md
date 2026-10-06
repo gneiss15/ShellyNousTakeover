@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # NousTakeover
 
-Version: 1.07
+Version: 1.09
 
 The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the repository root (`ShellyNousTakeover/`):
 
@@ -10,7 +10,7 @@ The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projec
 bash tools/BuildTakeover.sh nous
 ```
 
-Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot manufacturer upload. This input format is the raw ESP app image; later Rescue uploads require signed artifacts. The build script does not upload to a device. Workflow and open tests: [../Design.md](../Design.md) and [../TODO.md](../TODO.md).
+Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot manufacturer upload. This input format is the raw ESP app image; later Rescue uploads require signed artifacts. The build script does not upload to a device. Installation is described below; open tests: [TODO](../TODO.md).
 
 ## Artifact contents and installation
 
@@ -45,7 +45,7 @@ The shared state machine supports the Nous order Rescue → bootloader → Rescu
 
 The app checks real chip/flash/security/slot data, original bootloader identity, partition table, existing SafeBoot image, boot selection, and payloads. Rescue is checked in full, including the erased remainder. Preserved areas (flash pre-area, partition table/NVS, running Main, and filesystem) are independently compared before and after the flow. The bootloader and OTA partition are saved for bounded error rollback. The old SafeBoot app is not saved: rollback means a verified boot path to the running Takeover, not restoration of the original Tasmota or its old SafeBoot app.
 
-The PC precheck and one-time SafeBoot upload are implemented in `tools/NousTakeover.py`; see the project README for operation. Final verification requires the new Rescue status, including an unchanged device MAC. PC interfaces have been host-checked; without a fresh NOUS device, the new overall flow has not been tested on hardware. Do not infer hardware approval from the build or host tests alone.
+The PC precheck and one-time SafeBoot upload are implemented in `tools/NousTakeover.py`; see the project README for operation. Final verification requires the new Rescue status, including an unchanged device MAC. I successfully converted four NOUS A8T devices with the earlier migration procedure. The latest standalone implementation in this repository has been built and host-tested; only this new overall flow still lacks a test on an unmodified device, because all four available NOUS devices are already converted. Those earlier successes are practical experience with the predecessor, not a hardware test of this latest implementation.
 
 ## Supported input baseline
 

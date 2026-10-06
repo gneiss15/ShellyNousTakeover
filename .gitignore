@@ -13,3 +13,11 @@ Secrets.local.json
 
 # Local development history; public open work is maintained in TODO.md.
 /ToDo.txt
+
+# Local project rules; not part of the public source distribution.
+/PrjRegeln.md
+/PrjRegeln.de.md
+
+# Local design notes; public operation is documented in the READMEs.
+/Design.md
+/Design.de.md

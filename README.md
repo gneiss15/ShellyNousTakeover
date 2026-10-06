@@ -2,11 +2,17 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyNousTakeover
 
-Version: 1.16
+Version: 1.20
 
 ShellyNousTakeover converts a supported Shelly Plug M Gen3 or NOUS A8T to a system with a standalone Rescue app and hardware Safe Boot. Takeover contains the final bootloader and Rescue. After successful takeover, a compatible Main app can be installed through Rescue.
 
 **Development status:** Shelly takeover through verified Rescue startup has been performed on a fresh device. The exact test scope is in [HardwareTestResults.json](HardwareTestResults.json); current work is tracked in [TODO.md](TODO.md).
+
+With the earlier NOUS A8T migration procedure, I successfully converted four devices. The new, standalone NOUS implementation in this repository has been built and host-tested, but this latest overall flow has not yet been tested on an unmodified device: my four NOUS devices are already converted. The outstanding hardware test therefore concerns this implementation version, not whether NOUS takeover has ever worked.
+
+## Feedback welcome
+
+I explicitly welcome feedback: experiences with supported devices, problems, unclear instructions, and suggestions for improvement. Please use [GitHub Issues](https://github.com/gneiss15/ShellyNousTakeover/issues). For technical reports, include the device model, original firmware version/build, the step involved, and the error message. Successful tests are welcome too. Remove WLAN credentials, passwords, and private keys from any logs or attachments before posting.
 
 ## License
 
@@ -203,6 +209,16 @@ Shelly: the script serves only the built OTA package on a local HTTP port and se
 Both scripts wait for the new Rescue JSON status and check device MAC, project/DeviceType/version, valid geometry, running/selected Rescue boot target, and that Main is not installed yet. A successful HTTP upload response alone does not count as a successful takeover. A connection loss triggers neither another upload nor a reset; app errors or missing completion confirmation remain errors. Takeover performs rollback within its verified limits.
 
 Optionally set existing web login through SHELLY_USER/SHELLY_PASSWORD or NOUS_USER/NOUS_PASSWORD; the default user is admin. Do not put passwords in project files or command-line arguments. Scripts do not print full device responses or authentication data. Rescue status: read-only GET /status.
+
+## Migration checks and bootloader
+
+Before writing, Takeover checks hardware/security, the original bootloader, partition table, running app, and embedded payloads. It starts web diagnostics before these checks and keeps them available on errors. Every migration write is read back and verified; rollback depends on a confirmed baseline and unambiguous write state. The PC checks the original firmware before upload, because the running Takeover cannot establish its predecessor’s firmware version from its own version.
+
+The Shelly dual bootloader remains the final bootloader and supports both the original and migrated partition tables. No later bootloader replacement is required. Use the documented build and migration scripts; generic `idf.py flash` can overwrite the required layout or Rescue. The repository builds independently of the older Prjs project trees.
+
+For Shelly, stock OTA installs Takeover and its blank filesystem first. Takeover then checks and, if necessary, writes the final bootloader, prepares Rescue and NVS/OTA metadata, writes the new partition table, and starts Rescue. For NOUS, Takeover writes and verifies Rescue first, then the bootloader and Rescue boot selection; the supported partition table stays unchanged.
+
+After verified Rescue startup, takeover is complete and Main is considered empty. There is no stock rollback service in Rescue. Migration rollback is limited to failures before that point and the verified data available for the respective device; it is not a guarantee of restoring the original manufacturer firmware.
 
 ## Structure
 
