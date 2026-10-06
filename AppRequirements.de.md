@@ -2,7 +2,7 @@ English version is [here](AppRequirements.md).
 
 # Anforderungen an eine spätere Main-App
 
-Version: 1.03
+Version: 1.04
 
 Die folgenden Geometrien entsprechen den eigenständigen Bootloader-/Rescue-Builds.
 Die neue Laufzeit ist noch am Gerät zu prüfen. Adressen sind absolute Flashadressen; Größen in Bytes.
@@ -55,7 +55,7 @@ Kalibrierung im NVS erhalten; kein pauschales NVS-Löschen bei Main-/FS-Updates.
 - Firmware und LittleFS als getrennte, korrekt typisierte und RSA-signierte
   Artefakte hochladen. Signierschlüssel muss zum einkompilierten öffentlichen
   Rescue-Schlüssel passen; beliebiges raw .bin wird nicht als normales Update akzeptiert.
-- Neue DeviceTypes: Shelly standardmäßig `TmrSwShellyC3V1`, Nous `TakeoverNousA8TV1`
+- Neue DeviceTypes: Shelly standardmäßig `TmrSwShellyC3V1`, Nous `TmrSwA8T`
   (über `TAKEOVER_DEVICE_TYPE` ausdrücklich anpassbar).
   Manifest, Artefakttyp und DeviceType müssen zum Ziel passen.
 - Die neue Rescue verlangt keinen bestimmten Main-Projektnamen. Sie prüft das

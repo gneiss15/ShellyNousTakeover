@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyNousTakeover
 
-Version: 1.15
+Version: 1.16
 
 ShellyNousTakeover converts a supported Shelly Plug M Gen3 or NOUS A8T to a system with a standalone Rescue app and hardware Safe Boot. Takeover contains the final bootloader and Rescue. After successful takeover, a compatible Main app can be installed through Rescue.
 
@@ -22,13 +22,13 @@ The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Mai
 
 ## DeviceType
 
-DeviceType describes upload compatibility independently of device name and Takeover project name. Defaults: Shelly `TmrSwShellyC3V1`, NOUS `TakeoverNousA8TV1`. Explicitly set a different type before the build and PC takeover command:
+DeviceType describes upload compatibility independently of device name and Takeover project name. Defaults: Shelly `TmrSwShellyC3V1`, NOUS `TmrSwA8T`. Explicitly set a different type before the build and PC takeover command:
 
 ```bash
 export TAKEOVER_DEVICE_TYPE='TmrSwShellyC3V1'
 ```
 
-The value must contain at most 31 ASCII letters/digits and begin with a letter. Rescue build, signed artifacts, later Main build, and PC completion check must use the same type. Changing the environment does not change an already installed Rescue. The previously used `TakeoverShellyC3V1` is a different type and requires a deliberate migration.
+The value must contain at most 31 ASCII letters/digits and begin with a letter. Rescue build, signed artifacts, later Main build, and PC completion check must use the same type. Changing the environment does not change an already installed Rescue.
 
 ## Hardware Safe Boot and Rescue
 
@@ -59,7 +59,16 @@ The PC may use Ethernet. For Shelly, the device must also be able to reach the P
 
 ## Check or install the toolchain
 
-SDK and compiler versions are pinned in `Toolchain.lock.json`. First set `TAKEOVER_IDF_PATH` and `TAKEOVER_IDF_TOOLS_PATH` to the desired external directories (see below). Checking requires neither private configuration nor a device address:
+SDK and compiler versions are pinned in `Toolchain.lock.json`. Choose the installation locations before checking or installing:
+
+```bash
+export TAKEOVER_IDF_PATH="$HOME/tools/esp-idf-v5.5.1"
+export TAKEOVER_IDF_TOOLS_PATH="$HOME/tools/espressif"
+```
+
+`TAKEOVER_IDF_PATH` is the SDK source directory; `TAKEOVER_IDF_TOOLS_PATH` stores the compilers, tools, and SDK Python environment. Replace these example paths with your preferred locations outside the repository. These are reusable installations: other ESP-IDF projects can use the same SDK and set `IDF_TOOLS_PATH` to the same tools directory before sourcing the SDK’s `export.sh`. No separate installation per project is required when its toolchain requirements match. Logs remain in this repository’s `generated/` directory.
+
+Checking requires neither private configuration nor a device address:
 
 ```bash
 bash tools/SetupToolchain.sh --check
@@ -94,11 +103,11 @@ TAKEOVER_PRIVATE_DIR contains Secrets.local.json and private.key/public.key.
 
 `TAKEOVER_DEVICE_TYPE` is optional and applies to the selected build and PC takeover
 command. If unset, the type is read from `<target>/DeviceType.txt`: Shelly
-`TmrSwShellyC3V1`, NOUS `TakeoverNousA8TV1`.
+`TmrSwShellyC3V1`, NOUS `TmrSwA8T`.
 For NOUS, replace the Shelly value above before its build/command:
 
 ```bash
-export TAKEOVER_DEVICE_TYPE="TakeoverNousA8TV1"
+export TAKEOVER_DEVICE_TYPE="TmrSwA8T"
 ```
 
 Alternatively, run `unset TAKEOVER_DEVICE_TYPE` to use the selected project's default

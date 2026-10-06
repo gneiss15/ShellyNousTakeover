@@ -2,7 +2,7 @@ Deutsche Version [hier](AppRequirements.de.md).
 
 # Requirements for a Future Main App
 
-Version: 1.03
+Version: 1.04
 
 The geometries below match the standalone bootloader/rescue builds. The new runtime still needs device testing. Addresses are absolute flash addresses; sizes are bytes. Do not flash a partition table or bootloader from a generic board profile.
 
@@ -45,7 +45,7 @@ The SDK runtime uses partition-table offset 0x8000. Preserve device-specific cal
 - Native ESP app for the respective chip; the entire app binary must fit in the Main partition. Main updates do not overwrite Rescue.
 - No A/B app OTA: Main requests Rescue; Rescue writes Main and LittleFS. Normal Arduino OTA to the “other” app does not fit this geometry.
 - Upload firmware and LittleFS as separate, correctly typed, RSA-signed artifacts. The signing key must match the public key compiled into Rescue; an arbitrary raw `.bin` is not accepted as a normal update.
-- New DeviceTypes: Shelly defaults to `TmrSwShellyC3V1`, Nous to `TakeoverNousA8TV1` (explicitly adjustable through `TAKEOVER_DEVICE_TYPE`). The manifest, artifact type, and DeviceType must match the target.
+- New DeviceTypes: Shelly defaults to `TmrSwShellyC3V1`, Nous to `TmrSwA8T` (explicitly adjustable through `TAKEOVER_DEVICE_TYPE`). The manifest, artifact type, and DeviceType must match the target.
 - The new Rescue does not require a particular Main project name. It checks the ESP image and rejects known transition/takeover project names. Signed artifacts must still match the new DeviceType and verification key.
 - `spiffs` is the partition name/subtype; LittleFS is currently used there. A SPIFFS image is therefore not automatically compatible.
 - The app checks geometry before NVS/flash/hardware access. Do not copy button/relay/LED assignments from other board profiles. Main starts with the relay safely OFF.

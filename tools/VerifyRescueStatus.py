@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VerifyRescueStatus.py, Version: 1.00
+# VerifyRescueStatus.py, Version: 1.01
 """Compile the actual read-only status route with SDK/socket mocks; no device access."""
 from pathlib import Path
 import json
@@ -18,7 +18,7 @@ prelude=r'''
 #include <cassert>
 #define ESP_OK 0
 #define ESP_MAC_WIFI_STA 0
-#define ESP_UPDATE_DEVICE_TYPE "TakeoverNousA8TV1"
+#define ESP_UPDATE_DEVICE_TYPE "TmrSwA8T"
 struct esp_partition_t { unsigned address; };
 static esp_partition_t Rescue={0x10000};
 static bool Geometry=true,MainReady=false,MacOk=true,BootPresent=true;
@@ -46,7 +46,7 @@ with tempfile.TemporaryDirectory() as t:
  subprocess.run(['g++','-std=c++17','-Wall','-Wextra','-Werror',str(p/'test.cpp'),'-o',str(p/'test')],check=True)
  rows=[json.loads(line) for line in subprocess.check_output([str(p/'test')],text=True).splitlines()]
  assert len(rows)==4 and rows[0]['Mac']=='020000000001' and rows[0]['GeometryValid'] is True
- assert rows[0]['Application']=='Rescue' and rows[0]['Project']=='NousTakeover' and rows[0]['DeviceType']=='TakeoverNousA8TV1'
+ assert rows[0]['Application']=='Rescue' and rows[0]['Project']=='NousTakeover' and rows[0]['DeviceType']=='TmrSwA8T'
  assert rows[0]['BootOffset']==rows[0]['RunningOffset']==0x10000 and rows[0]['MainReady'] is False
  assert rows[1]['GeometryValid'] is False and rows[2]['MainReady'] is True and rows[3]['BootOffset']==0
 print('Actual Rescue status route passed: JSON, MAC/project/type, geometry, boot target, Main-ready, identity failure and response bounds. SDK/socket mocks; no hardware test.')

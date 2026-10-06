@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Version: 1.15
+Version: 1.16
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -39,7 +39,7 @@ sind geplant, aber noch nicht veröffentlicht. Links werden nach deren Erstellun
 ## DeviceType
 
 Der DeviceType beschreibt die Upload-Kompatibilität, unabhängig von Gerätename und
-Takeover-Projektname. Standard: Shelly `TmrSwShellyC3V1`, NOUS `TakeoverNousA8TV1`.
+Takeover-Projektname. Standard: Shelly `TmrSwShellyC3V1`, NOUS `TmrSwA8T`.
 Ein anderer Typ wird vor dem Build und dem PC-Übernahmeaufruf ausdrücklich gesetzt:
 
 ```bash
@@ -49,8 +49,7 @@ export TAKEOVER_DEVICE_TYPE='TmrSwShellyC3V1'
 Der Wert muss aus höchstens 31 ASCII-Buchstaben/Ziffern bestehen und mit einem
 Buchstaben beginnen. Rescue-Build, signierte Artefakte, späterer Main-Build und
 PC-Abschlussprüfung müssen denselben Typ verwenden. Eine Environment-Änderung
-ändert keine bereits installierte Rescue. Das bisher verwendete
-`TakeoverShellyC3V1` ist ein anderer Typ und erfordert eine gezielte Umstellung.
+ändert keine bereits installierte Rescue.
 
 ## Hardware-Safe-Boot und Rescue
 
@@ -100,10 +99,23 @@ die Routerreservierung hält ihre Adresse gleich.
 
 ## Toolchain prüfen oder einrichten
 
-Die SDK- und Compilerstände sind in `Toolchain.lock.json` festgelegt. Zuerst
-`TAKEOVER_IDF_PATH` und `TAKEOVER_IDF_TOOLS_PATH` auf die gewünschten externen
-Verzeichnisse setzen (siehe unten). Die reine Prüfung benötigt weder private
-Konfiguration noch eine Geräteadresse:
+Die SDK- und Compilerstände sind in `Toolchain.lock.json` festgelegt. Vor der
+Prüfung oder Installation die Installationsziele wählen:
+
+```bash
+export TAKEOVER_IDF_PATH="$HOME/tools/esp-idf-v5.5.1"
+export TAKEOVER_IDF_TOOLS_PATH="$HOME/tools/espressif"
+```
+
+`TAKEOVER_IDF_PATH` bezeichnet das SDK-Quellverzeichnis; `TAKEOVER_IDF_TOOLS_PATH`
+enthält Compiler, Werkzeuge und die SDK-Pythonumgebung. Die Beispielpfade durch
+eigene Zielpfade außerhalb des Repositories ersetzen. Diese Installationen können
+auch andere ESP-IDF-Projekte verwenden: dasselbe SDK nutzen und vor dem Einlesen
+seiner `export.sh` den Wert `IDF_TOOLS_PATH` auf dasselbe Werkzeugverzeichnis setzen.
+Bei passenden Toolchain-Anforderungen ist keine separate Installation je Projekt
+nötig. Logs bleiben im Verzeichnis `generated/` dieses Repositories.
+
+Die reine Prüfung benötigt weder private Konfiguration noch eine Geräteadresse:
 
 ```bash
 bash tools/SetupToolchain.sh --check
@@ -149,11 +161,11 @@ TAKEOVER_PRIVATE_DIR enthält Secrets.local.json sowie private.key/public.key.
 
 `TAKEOVER_DEVICE_TYPE` ist optional und gilt für den jeweiligen Build und
 PC-Übernahmeaufruf. Ohne gesetzte Variable wird der Typ aus `<Ziel>/DeviceType.txt`
-verwendet: Shelly `TmrSwShellyC3V1`, NOUS `TakeoverNousA8TV1`.
+verwendet: Shelly `TmrSwShellyC3V1`, NOUS `TmrSwA8T`.
 Für NOUS den obigen Shelly-Wert vor dessen Build/Aufruf ersetzen:
 
 ```bash
-export TAKEOVER_DEVICE_TYPE="TakeoverNousA8TV1"
+export TAKEOVER_DEVICE_TYPE="TmrSwA8T"
 ```
 
 Oder `unset TAKEOVER_DEVICE_TYPE` ausführen, um wieder den jeweiligen Projektstandard

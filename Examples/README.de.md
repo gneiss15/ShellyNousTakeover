@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # Mini-Examples: Shelly und NOUS
 
-Version: 1.01
+Version: 1.02
 
 `MiniMain/` ist eine kleine ESP-IDF-App, die für beide Zielgeräte separat gebaut wird.
 Sie zeigt den Vertrag mit Rescue ohne Abhängigkeit von TmrSw oder Arduino:
@@ -31,8 +31,8 @@ Danach aus dem Projektverzeichnis:
 export TAKEOVER_DEVICE_TYPE='TmrSwShellyC3V1'
 bash tools/BuildExample.sh shelly
 
-# NOUS-Standard der neuen Takeover-Rescue ist TakeoverNousA8TV1.
-export TAKEOVER_DEVICE_TYPE='TakeoverNousA8TV1'
+# NOUS-Standard der neuen Takeover-Rescue ist TmrSwA8T.
+export TAKEOVER_DEVICE_TYPE='TmrSwA8T'
 bash tools/BuildExample.sh nous
 ```
 
