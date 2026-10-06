@@ -2,15 +2,36 @@ Deutsche Version [hier](README.de.md).
 
 # NousTakeover
 
-Version: 1.06
+Version: 1.07
 
-The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the project directory:
+The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the repository root (`ShellyNousTakeover/`):
 
 ```bash
 bash tools/BuildTakeover.sh nous
 ```
 
 Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot manufacturer upload. This input format is the raw ESP app image; later Rescue uploads require signed artifacts. The build script does not upload to a device. Workflow and open tests: [../Design.md](../Design.md) and [../TODO.md](../TODO.md).
+
+## Artifact contents and installation
+
+`generated/NousTakeover/App/Takeover.bin` is relative to the repository root. It is a raw ESP app image containing the automatic Takeover, new bootloader, Rescue, and expected partition-table data as embedded payloads. NOUS uses this single `.bin` file rather than a ZIP package. The existing partition table is checked and preserved.
+
+Keep the image at this generated path; use the PC script to install it through Tasmota SafeBoot. With the prerequisites and environment variables, including `NOUS_IP`, set according to the [main README](../README.md#pc-precheck-and-takeover), run from the repository root:
+
+```bash
+# Read-only device precheck; no restart or upload:
+python3 tools/NousTakeover.py
+```
+
+If Tasmota requires authentication, set `NOUS_PASSWORD` and optionally `NOUS_USER` (default `admin`) before the PC commands. These are Tasmota web credentials, separate from the compiled WLAN settings.
+
+Before the next command, ensure stable power and disconnect attached loads. This command changes the device:
+
+```bash
+python3 tools/NousTakeover.py --execute
+```
+
+The script validates the image, rechecks the device, switches it to Tasmota SafeBoot, and confirms its identity and upload route. It then uploads `Takeover.bin` once. Takeover starts automatically and performs its guards and migration; the script waits for the new Rescue and checks device MAC, DeviceType, geometry, boot selection, and that Main is not yet installed. Keep the PC/script running until completion. An uncertain upload is not repeated automatically. Later Main/filesystem uploads use signed artifacts through Rescue, as described in [AppRequirements](../AppRequirements.md).
 
 The bounded bootloader writer in `LoaderWriter/` saves the actual original bytes in RAM and writes only `0x1000` through `0x7FFF`. It requires prior identity approval and verified Rescue. The partition table and OTA partition are compared before and after writing. On write errors, it restores and verifies the original bootloader while these invariants remain unchanged. Failed rollback, write-protection restoration, or invariant checks block reboot. The writer does not replace device/firmware/bootloader provenance checks.
 

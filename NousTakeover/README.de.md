@@ -2,11 +2,11 @@ English version is [here](README.md).
 
 # NousTakeover
 
-Version: 1.06
+Version: 1.07
 
 Bootloader, Rescue und automatische Takeover-App sind eigenständige ESP-IDF-Projekte.
-Environment und private Konfiguration: ../README.md. Nach deren Einrichtung im
-Projektverzeichnis bauen:
+Environment und private Konfiguration: [Haupt-README](../README.de.md). Nach deren
+Einrichtung aus dem Repository-Hauptverzeichnis (`ShellyNousTakeover/`) bauen:
 
 ```bash
 bash tools/BuildTakeover.sh nous
@@ -16,6 +16,27 @@ Ausgabe ist `generated/NousTakeover/App/Takeover.bin` für den Tasmota-SafeBoot-
 Herstellerupload. Dieses Eingangsformat ist das rohe ESP-App-Image; spätere Rescue-
 Uploads verlangen signierte Artefakte. Das Buildskript führt keinen Geräteupload aus.
 Ablauf und offene Tests: [Design](../Design.de.md) und [TODO](../TODO.de.md).
+
+## Artefaktinhalt und Installation
+
+`generated/NousTakeover/App/Takeover.bin` ist relativ zum Repository-Hauptverzeichnis angegeben. Das rohe ESP-App-Image enthält die automatische Takeover, den neuen Bootloader, Rescue und die erwarteten Partitionstabellendaten als eingebettete Payloads. NOUS verwendet diese einzelne `.bin`-Datei statt eines ZIP-Pakets. Die vorhandene Partitionstabelle wird geprüft und beibehalten.
+
+Das Image am generierten Pfad belassen und über das PC-Skript durch Tasmota SafeBoot installieren. Nach Erfüllen der Voraussetzungen und Setzen der Env-Variablen einschließlich `NOUS_IP` gemäß [Haupt-README](../README.de.md#pc-vorprüfung-und-übernahme) aus dem Repository-Hauptverzeichnis ausführen:
+
+```bash
+# Rein lesende Gerätevorprüfung; kein Neustart oder Upload:
+python3 tools/NousTakeover.py
+```
+
+Bei aktivierter Tasmota-Authentifizierung vor den PC-Aufrufen `NOUS_PASSWORD` und optional `NOUS_USER` (Standard `admin`) setzen. Das sind die Tasmota-Webzugangsdaten, getrennt von den einkompilierten WLAN-Einstellungen.
+
+Vor dem nächsten Befehl stabile Stromversorgung sicherstellen und angeschlossene Verbraucher entfernen. Dieser Befehl verändert das Gerät:
+
+```bash
+python3 tools/NousTakeover.py --execute
+```
+
+Das Skript prüft das Image und das Gerät erneut, schaltet auf Tasmota SafeBoot um und bestätigt dessen Identität und Uploadweg. Dann lädt es `Takeover.bin` einmal hoch. Takeover startet automatisch und führt ihre Prüfungen und Migration aus; das Skript wartet auf die neue Rescue und prüft Geräte-MAC, DeviceType, Geometrie, Bootauswahl und dass noch keine Main installiert ist. PC und Skript bis zum Abschluss laufen lassen. Ein unbestätigter Upload wird nicht automatisch wiederholt. Spätere Main-/Dateisystem-Uploads erfolgen als signierte Artefakte über Rescue, siehe [App-Anforderungen](../AppRequirements.de.md).
 
 Der begrenzte Bootloader-Writer in `LoaderWriter/` sichert die konkreten Originalbytes
 im RAM und schreibt ausschließlich `0x1000` bis `0x7FFF`. Er verlangt eine vorherige
