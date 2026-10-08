@@ -1,0 +1,15 @@
+# ProjectVersion.cmake, Version: 1.00
+get_filename_component(TAKEOVER_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+
+function(LoadTakeoverProjectVersion VersionKey)
+  file(STRINGS "${TAKEOVER_ROOT}/Versions.txt" VersionEntries REGEX "^${VersionKey}=")
+  list(LENGTH VersionEntries EntryCount)
+  if(NOT EntryCount EQUAL 1)
+    message(FATAL_ERROR "Expected one ${VersionKey} entry in ${TAKEOVER_ROOT}/Versions.txt")
+  endif()
+  string(REGEX REPLACE "^[^=]+=" "" ProjectVersion "${VersionEntries}")
+  if(NOT ProjectVersion MATCHES "^[A-Za-z0-9][A-Za-z0-9._+-]*$")
+    message(FATAL_ERROR "Invalid project version for ${VersionKey}: ${ProjectVersion}")
+  endif()
+  set(PROJECT_VER "${ProjectVersion}" PARENT_SCOPE)
+endfunction()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# PreparePrivate.py, Version: 1.02
+# PreparePrivate.py, Version: 1.03
 """Validate external secrets/keys and generate private headers without logging values."""
 import argparse
 import json
@@ -18,6 +18,15 @@ def command(args):
 
 
 def prepare(private, target, output):
+    root = Path(__file__).resolve().parent.parent
+    versions = {}
+    for line in (root / 'Versions.txt').read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith('#'):
+            name, value = line.split('=', 1)
+            versions[name.strip()] = value.strip()
+    version_key = 'ShellyRescue' if target == 'ShellyTakeover' else 'NousRescue'
+    rescue_version = versions[version_key]
     secrets = json.loads((private / 'Secrets.local.json').read_text())
     if not isinstance(secrets, dict):
         raise ValueError('Secrets root must be an object')
@@ -51,7 +60,7 @@ def prepare(private, target, output):
         raise ValueError('Private/public signing keys do not match')
     output.mkdir(parents=True, exist_ok=True, mode=0o700)
     lines = ['#pragma once', '#define ESP_RESCUE_PROJECT_NAME ' + json.dumps(target),
-             '#define ESP_RESCUE_VERSION "1.00"']
+             '#define ESP_RESCUE_VERSION ' + json.dumps(rescue_version)]
     for name, macro in zip(FIELDS, ['SSID', 'PW', 'SSID2', 'PW2']):
         lines.append('#define ESP_RESCUE_WLAN_' + macro + ' ' + json.dumps(config[name], ensure_ascii=True))
     path = output / 'EspRescueProject.h'

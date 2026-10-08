@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VerifyNousPc.py, Version: 1.01
+# VerifyNousPc.py, Version: 1.02
 """Verify actual PC orchestration with synthetic HTTP responses; no device access."""
 import copy
 import json
@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 import urllib.error
 import NousTakeover as pc
+VERSIONS={key:value for key,value in (line.strip().split('=',1) for line in (Path(__file__).resolve().parent.parent/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
 
 class Clock:
     value=0
@@ -35,7 +36,7 @@ class Http:
             if isinstance(response,Exception):raise response
             return json.dumps(response).encode()
         raise AssertionError(p)
-def rescue():return {'Application':'Rescue','Project':'NousTakeover','Version':'1.00','DeviceType':'TmrSwA8T','Mac':'020000000001','GeometryValid':True,'RunningOffset':0x10000,'BootOffset':0x10000,'MainReady':False}
+def rescue():return {'Application':'Rescue','Project':'NousTakeover','Version':VERSIONS['NousRescue'],'DeviceType':'TmrSwA8T','Mac':'020000000001','GeometryValid':True,'RunningOffset':0x10000,'BootOffset':0x10000,'MainReady':False}
 class Test(unittest.TestCase):
     def test_read_only(self):
         h=Http();self.assertEqual(pc.preflight(h),'020000000001');self.assertEqual(h.uploads,0);self.assertFalse(h.safe)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BuildExample.sh, Version: 1.00
+# BuildExample.sh, Version: 1.01
 set -Eeuo pipefail
 [[ $# == 1 && ( "$1" == shelly || "$1" == nous ) ]] || { echo "Usage: $0 shelly|nous" >&2; exit 2; }
 ToolDir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -39,7 +39,9 @@ import sys
 sys.path.insert(0,sys.argv[1])
 from VerifyBuild import verify_image
 out=Path(sys.argv[2]);shelly=sys.argv[3]=='esp32c3'
-verify_image(out/'MiniMain.bin',5 if shelly else 0,0x2a0000 if shelly else 0x2d0000,'1.00')
+root=Path(sys.argv[1]).parent
+versions={key:value for key,value in (line.strip().split('=',1) for line in (root/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
+verify_image(out/'MiniMain.bin',5 if shelly else 0,0x2a0000 if shelly else 0x2d0000,versions['MiniMain'])
 assert (out/'MiniMain.bin').read_bytes()[80:112].split(b'\0')[0]==b'MiniMain'
 config=(out/'sdkconfig').read_text()
 assert 'CONFIG_PARTITION_TABLE_OFFSET='+('0x10000' if shelly else '0x8000')+'\n' in config

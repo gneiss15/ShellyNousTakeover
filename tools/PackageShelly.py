@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-# PackageShelly.py, Version: 1.00
+# PackageShelly.py, Version: 1.01
 """Create the supported manufacturer app + blank-fs package, never raw flash parts."""
 from pathlib import Path
 import hashlib,json,zipfile
 from VerifyBuild import verify_image
 root=Path(__file__).resolve().parent.parent
+versions={key:value for key,value in (line.strip().split('=',1) for line in (root/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
 out=root/'generated/ShellyTakeover/App'
 image=(out/'Takeover.bin').read_bytes()
-verify_image(out/'Takeover.bin',5,0x2a0000,'1.00')
+verify_image(out/'Takeover.bin',5,0x2a0000,versions['ShellyApp'])
 assert image[80:112].split(b'\0')[0]==b'ShellyTakeover'
 fs=b'\xff'*0xe0000
 parts={}
@@ -17,7 +18,7 @@ parts['fs']['fs_size']=len(fs)
 import datetime
 now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
 manifest={'name':'PlugMG3','platform':'esp32c3','version':'99.0.0',
-          'build_id':now.strftime('%Y%m%d-%H%M%S')+'/shelly-takeover-1.00',
+          'build_id':now.strftime('%Y%m%d-%H%M%S')+'/shelly-takeover-'+versions['ShellyApp'],
           'build_timestamp':now.isoformat().replace('+00:00','Z'),'parts':parts}
 for name in ['CandidateLoader','Rescue','OldTable','NewTable']:
     assert (out/(name+'.bin')).read_bytes() in image, 'Missing embedded payload: '+name

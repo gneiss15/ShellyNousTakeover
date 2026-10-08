@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Version: 1.20
+Dokumentversion: 1.21
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -14,6 +14,8 @@ am frischen Gerät durchgeführt. Der genaue Testumfang steht in
 [HardwareTestResults.json](HardwareTestResults.json), der Arbeitsstand in [TODO.de.md](TODO.de.md).
 
 Mit dem früheren NOUS-A8T-Migrationsverfahren habe ich vier Geräte erfolgreich übernommen. Die neue, eigenständige NOUS-Implementierung dieses Repositories wurde gebaut und hostgeprüft, aber dieser letzte Gesamtpfad noch nicht an einem unveränderten Gerät getestet: Meine vier NOUS sind bereits umgestellt. Der offene Gerätetest betrifft somit diese Implementierungsversion; die NOUS-Übernahme wurde mit dem früheren Verfahren bereits erfolgreich durchgeführt.
+
+Produktversionen stehen zentral in `Versions.txt` im Repository-Stamm: Shelly- und NOUS-App/Rescue sowie das MiniMain-Beispiel haben jeweils einen eigenen Eintrag. IDF-Projektkennung, Rescue-Status, Paketprüfung und PC-seitige Checks lesen diese Werte. Generierte Artefakte werden nicht direkt bearbeitet und Produktversionen nicht zusätzlich an anderer Stelle eingetragen.
 
 ## Rückmeldungen willkommen
 

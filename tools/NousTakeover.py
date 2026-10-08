@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# NousTakeover.py, Version: 1.01
+# NousTakeover.py, Version: 1.02
 """Read-only preflight by default; explicit manufacturer upload and Rescue verification."""
 import argparse
 import base64
@@ -17,6 +17,7 @@ import urllib.request
 import uuid
 
 ROOT=Path(__file__).resolve().parent.parent
+VERSIONS={key:value for key,value in (line.strip().split('=',1) for line in (ROOT/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
 class TakeoverError(Exception):
     pass
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -84,7 +85,8 @@ def rescue_verified(status,expected_mac,target='nous'):
     project,offset={'nous':('NousTakeover',0x10000),'shelly':('ShellyTakeover',0x640000)}[target]
     device_type=os.environ.get('TAKEOVER_DEVICE_TYPE',(ROOT/project/'DeviceType.txt').read_text().strip())
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9]{0,30}',device_type):raise TakeoverError('Invalid TAKEOVER_DEVICE_TYPE')
-    if status.get('Project')!=project or status.get('DeviceType')!=device_type or status.get('Version')!='1.00':
+    version_key='ShellyRescue' if target=='shelly' else 'NousRescue'
+    if status.get('Project')!=project or status.get('DeviceType')!=device_type or status.get('Version')!=VERSIONS[version_key]:
         raise TakeoverError('Different Rescue identity/version at target IP')
     if mac(status.get('Mac'))!=expected_mac:raise TakeoverError('Different device MAC after migration')
     if status.get('GeometryValid') is not True or status.get('RunningOffset')!=offset or status.get('BootOffset')!=offset or status.get('MainReady') is not False:

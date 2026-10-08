@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VerifyBuild.py, Version: 1.00
+# VerifyBuild.py, Version: 1.02
 """Verify ESP image structure, SDK settings, geometry and signed Rescue payloads."""
 import hashlib
 import json
@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
+VERSIONS = {key: value for key, value in (line.strip().split('=', 1) for line in (ROOT/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
 
 
 def verify_image(path, chip, maximum, version=None):
@@ -36,13 +37,16 @@ def verify_image(path, chip, maximum, version=None):
 
 
 def main():
-    results = []
+    report_path = ROOT/'BuildResults.json'
+    report = json.loads(report_path.read_text()) if report_path.exists() else {}
+    results = list(report.get('results', []))
     for target, chip, table, flash, rescue_size, loader_size in [
         ('ShellyTakeover', 5, '0x10000', '8MB', 0x180000, 0x6000),
         ('NousTakeover', 0, '0x8000', '4MB', 0xd0000, 0x7000)]:
         for component, name, size in [('Rescue', 'Rescue.bin', rescue_size), ('Bootloader', 'Bootloader.bin', loader_size)]:
             directory = ROOT/'generated'/target/component
-            count = verify_image(directory/name, chip, size, '1.00' if component=='Rescue' else None)
+            version_key = 'ShellyRescue' if target == 'ShellyTakeover' else 'NousRescue'
+            count = verify_image(directory/name, chip, size, VERSIONS[version_key] if component=='Rescue' else None)
             config = (directory/'sdkconfig').read_text()
             assert 'CONFIG_PARTITION_TABLE_OFFSET='+table+'\n' in config
             assert 'CONFIG_ESPTOOLPY_FLASHSIZE_'+flash+'=y\n' in config
@@ -52,11 +56,22 @@ def main():
                 prefix = (directory/'Rescue.signed').read_bytes()
                 raw = (directory/name).read_bytes()
                 assert prefix.endswith(raw), 'Signed artifact does not contain current payload'
-            results.append({'target': target, 'component': component, 'bytes': count,
-                            'chip_checked': True, 'image_checksum_checked': True,
-                            'sdk_table_offset_checked': True})
-    report = {'version': '1.00', 'hardware_tested': False, 'results': results}
-    (ROOT/'BuildResults.json').write_text(json.dumps(report, indent=2)+'\n')
+            current = {'target': target, 'component': component,
+                       'product_version': VERSIONS[version_key] if component == 'Rescue' else None,
+                       'bytes': count, 'chip_checked': True,
+                       'image_checksum_checked': True,
+                       'sdk_table_offset_checked': True}
+            existing_index = next((index for index, item in enumerate(results)
+                                   if item.get('target') == target and item.get('component') == component), None)
+            if existing_index is None:
+                results.append(current)
+            else:
+                results[existing_index].update(current)
+    report.setdefault('version', '1.07')
+    report['product_versions'] = VERSIONS
+    report.setdefault('hardware_tested', False)
+    report['results'] = results
+    report_path.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))
 
 

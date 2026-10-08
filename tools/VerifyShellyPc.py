@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VerifyShellyPc.py, Version: 1.06
+# VerifyShellyPc.py, Version: 1.07
 """Exercise actual Shelly PC orchestration and one-file HTTP server without hardware."""
 import json
 import os
@@ -12,6 +12,7 @@ import urllib.error
 import urllib.request
 import ShellyTakeover as pc
 from NousTakeover import rescue_verified
+VERSIONS={key:value for key,value in (line.strip().split('=',1) for line in (Path(__file__).resolve().parent.parent/'Versions.txt').read_text().splitlines() if line.strip() and not line.lstrip().startswith('#'))}
 class Http:
     base='http://192.0.2.10'
     def __init__(self):
@@ -69,7 +70,7 @@ class Test(unittest.TestCase):
             monitor.assert_not_called()
         self.assertEqual(h.writes,1)
     def test_rescue(self):
-        s={'Application':'Rescue','Project':'ShellyTakeover','Version':'1.00','DeviceType':'TmrSwShellyC3V1','Mac':'020000000001','GeometryValid':True,'RunningOffset':0x640000,'BootOffset':0x640000,'MainReady':False}
+        s={'Application':'Rescue','Project':'ShellyTakeover','Version':VERSIONS['ShellyRescue'],'DeviceType':'TmrSwShellyC3V1','Mac':'020000000001','GeometryValid':True,'RunningOffset':0x640000,'BootOffset':0x640000,'MainReady':False}
         self.assertTrue(rescue_verified(s,'020000000001','shelly'))
         with patch.dict(os.environ,{'TAKEOVER_DEVICE_TYPE':'CustomShellyV1'}):
             with self.assertRaises(pc.TakeoverError):rescue_verified(s,'020000000001','shelly')

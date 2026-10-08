@@ -5,7 +5,7 @@
     {
       "target": "ShellyTakeover",
       "component": "Rescue",
-      "bytes": 767232,
+      "bytes": 767216,
       "chip_checked": true,
       "image_checksum_checked": true,
       "sdk_table_offset_checked": true,
@@ -13,12 +13,13 @@
       "clean_source_build_passed": true,
       "stock_guard_build": "exact 2.0.0 and 2.0.1 image digests; compiled/linked, not hardware tested",
       "fresh_toolchain_build_passed": true,
-      "hardware_tested": false
+      "hardware_tested": false,
+      "product_version": "1.01"
     },
     {
       "target": "ShellyTakeover",
       "component": "Bootloader",
-      "bytes": 23392,
+      "bytes": 23408,
       "chip_checked": true,
       "image_checksum_checked": true,
       "sdk_table_offset_checked": true,
@@ -26,19 +27,21 @@
       "clean_source_build_passed": true,
       "stock_guard_build": "exact 2.0.0 and 2.0.1 image digests; compiled/linked, not hardware tested",
       "fresh_toolchain_build_passed": true,
-      "hardware_tested": false
+      "hardware_tested": false,
+      "product_version": null
     },
     {
       "target": "NousTakeover",
       "component": "Rescue",
-      "bytes": 738944,
+      "bytes": 738912,
       "chip_checked": true,
       "image_checksum_checked": true,
       "sdk_table_offset_checked": true,
       "clean_source_build_bytes": 738944,
       "clean_source_build_passed": true,
       "fresh_toolchain_build_passed": true,
-      "hardware_tested": false
+      "hardware_tested": false,
+      "product_version": "1.01"
     },
     {
       "target": "NousTakeover",
@@ -50,7 +53,8 @@
       "clean_source_build_bytes": 27760,
       "clean_source_build_passed": true,
       "fresh_toolchain_build_passed": true,
-      "hardware_tested": false
+      "hardware_tested": false,
+      "product_version": null
     },
     {
       "target": "ShellyTakeover",
@@ -114,5 +118,12 @@
     "verify_build_images_and_geometry": "passed",
     "artifacts_copied_to_project_generated": true,
     "hardware_tested": false
+  },
+  "product_versions": {
+    "ShellyApp": "1.01",
+    "ShellyRescue": "1.01",
+    "NousApp": "1.01",
+    "NousRescue": "1.01",
+    "MiniMain": "1.01"
   }
 }

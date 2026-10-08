@@ -1,0 +1,5 @@
+ShellyApp=1.01
+ShellyRescue=1.01
+NousApp=1.01
+NousRescue=1.01
+MiniMain=1.01
