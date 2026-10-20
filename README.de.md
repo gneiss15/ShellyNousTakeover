@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Version: 1.20
+Dokumentversion: 1.21
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -18,6 +18,10 @@ Mit dem früheren NOUS-A8T-Migrationsverfahren habe ich vier Geräte erfolgreich
 ## Rückmeldungen willkommen
 
 Ich freue mich ausdrücklich über Rückmeldungen: Erfahrungen mit unterstützten Geräten, Probleme, unklare Anleitungen und Verbesserungsvorschläge. Bitte dafür die [GitHub Issues](https://github.com/gneiss15/ShellyNousTakeover/issues) nutzen. Bei technischen Rückmeldungen helfen Gerätemodell, ursprüngliche Firmware-Version/Build, der betroffene Schritt und die Fehlermeldung. Auch erfolgreiche Tests sind willkommen. Vor dem Teilen von Logs oder Anhängen WLAN-Zugangsdaten, Passwörter und private Schlüssel entfernen.
+
+## AquariumControl
+
+Die vollständigen Aquarium-Anwendungen liegen in [AquariumControl](https://github.com/gneiss15/AquariumControl): [TmrSwShelly](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwShelly), [TmrSwA8T](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwA8T), Feeder, MultiTimer und Dashboard. ShellyNousTakeover übernimmt die Erstübernahme und den Rescue-Einstieg; AquariumControl liefert die Main-Anwendungen. AquariumControl ist Work in progress; Anmerkungen und Testergebnisse sind willkommen.
 
 ## Lizenz
 
@@ -39,8 +43,7 @@ beschriebenen Hardware- und Stromausfallrisiken.
 Die [Mini-Examples für Shelly und NOUS](Examples/README.de.md) zeigen eine baubare
 Main-App mit eigenem Webstatus, sicher ausgeschaltetem Relais und Rückwechsel zu
 Rescue. Sie verwenden dieselbe Toolchain, private Konfiguration und Signierung.
-Separate Repositories für **TmrSwShelly** und **TmrSwA8T** als vollständige Beispiele
-sind geplant, aber noch nicht veröffentlicht. Links werden nach deren Erstellung ergänzt.
+Die vollständigen TmrSw-Anwendungen werden in AquariumControl gepflegt, siehe oben.
 
 ## DeviceType
 

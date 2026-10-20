@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyNousTakeover
 
-Version: 1.20
+Document version: 1.21
 
 ShellyNousTakeover converts a supported Shelly Plug M Gen3 or NOUS A8T to a system with a standalone Rescue app and hardware Safe Boot. Takeover contains the final bootloader and Rescue. After successful takeover, a compatible Main app can be installed through Rescue.
 
@@ -14,6 +14,10 @@ With the earlier NOUS A8T migration procedure, I successfully converted four dev
 
 I explicitly welcome feedback: experiences with supported devices, problems, unclear instructions, and suggestions for improvement. Please use [GitHub Issues](https://github.com/gneiss15/ShellyNousTakeover/issues). For technical reports, include the device model, original firmware version/build, the step involved, and the error message. Successful tests are welcome too. Remove WLAN credentials, passwords, and private keys from any logs or attachments before posting.
 
+## AquariumControl
+
+The complete aquarium applications are maintained in [AquariumControl](https://github.com/gneiss15/AquariumControl): [TmrSwShelly](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwShelly), [TmrSwA8T](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwA8T), feeders, MultiTimer and Dashboard. ShellyNousTakeover provides initial takeover and entry into Rescue; AquariumControl provides the Main applications. AquariumControl is a work in progress; feedback and test reports are welcome.
+
 ## License
 
 Required Notice: Copyright 2026 Günter Neiß
@@ -24,7 +28,7 @@ This license applies only to project-owned components. Third-party components re
 
 ## Example apps
 
-The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Main app with its own web status, safely switched-off relay, and return to Rescue. They use the same toolchain, private configuration, and signing setup. Separate repositories for complete **TmrSwShelly** and **TmrSwA8T** examples are planned but not yet published. Links will be added when they are created.
+The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Main app with its own web status, safely switched-off relay, and return to Rescue. They use the same toolchain, private configuration, and signing setup. The full TmrSw applications are maintained in AquariumControl as described above.
 
 ## DeviceType
 
