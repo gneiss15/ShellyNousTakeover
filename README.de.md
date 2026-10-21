@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Dokumentversion: 1.26
+Dokumentversion: 1.27
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -19,7 +19,7 @@ Ich freue mich ausdrücklich über Rückmeldungen: Erfahrungen mit unterstützte
 
 ## AquariumControl
 
-Die vollständigen Aquarium-Anwendungen liegen in [AquariumControl](https://github.com/gneiss15/AquariumControl): [TmrSwShelly](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwShelly), [TmrSwA8T](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwA8T), Feeder, MultiTimer und Dashboard. ShellyNousTakeover übernimmt die Erstübernahme und den Rescue-Einstieg; AquariumControl liefert die Main-Anwendungen. AquariumControl ist Work in progress; Anmerkungen und Testergebnisse sind willkommen.
+Die vollständigen Aquarium-Anwendungen liegen in [AquariumControl](https://github.com/gneiss15/AquariumControl): [TmrSwShelly](https://github.com/gneiss15/AquariumControl/tree/main/TmrSwShelly), [TmrSwA8T](https://github.com/gneiss15/AquariumControl/tree/main/TmrSwA8T), Feeder, MultiTimer und Dashboard. ShellyNousTakeover übernimmt die Erstübernahme und den Rescue-Einstieg; AquariumControl liefert die Main-Anwendungen. AquariumControl ist Work in progress; Anmerkungen und Testergebnisse sind willkommen.
 
 ## Lizenz
 
