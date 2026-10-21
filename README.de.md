@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Dokumentversion: 1.24
+Dokumentversion: 1.25
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
@@ -43,7 +43,7 @@ Main-App mit eigenem Webstatus, sicher ausgeschaltetem Relais und Rückwechsel z
 Rescue. Sie verwenden dieselbe Toolchain, private Konfiguration und Signierung.
 Die vollständigen TmrSw-Anwendungen werden in AquariumControl gepflegt, siehe oben.
 
-**Noch nicht praktisch geprüft:** MiniMain auf beiden Gerätefamilien, der vollständige NOUS-Ablauf sowie zusätzliche Fehlerfälle mit ungültiger Main oder unbrauchbarem Dateisystem. Hosttests ersetzen diese Gerätetests nicht.
+**Noch nicht praktisch geprüft:** eine frische Shelly-Übernahme mit der beschreibbaren Kalibrierpartition, MiniMain auf beiden Gerätefamilien, der vollständige NOUS-Ablauf sowie zusätzliche Fehlerfälle mit ungültiger Main oder unbrauchbarem Dateisystem. Hosttests ersetzen diese Gerätetests nicht.
 
 ## DeviceType
 
