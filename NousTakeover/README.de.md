@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # NousTakeover
 
-Version: 1.10
+Version: 1.11
 
 Bootloader, Rescue und automatische Takeover-App sind eigenständige ESP-IDF-Projekte.
 Environment und private Konfiguration: [Haupt-README](../README.de.md). Nach deren
@@ -66,14 +66,7 @@ begrenzte Fehler-Rücknahme gesichert. Die alte SafeBoot-App wird nicht gesicher
 Rücknahme bedeutet einen verifizierten Bootweg zur laufenden Takeover, keine
 Wiederherstellung der ursprünglichen Tasmota oder ihrer alten SafeBoot-App.
 
-Die PC-Vorprüfung und der einmalige SafeBoot-Upload sind in `tools/NousTakeover.py`
-implementiert; Bedienung im Projekt-README. Die abschließende Prüfung verlangt den
-neuen Rescue-Status einschließlich unveränderter Geräte-MAC. Mit dem früheren Migrationsverfahren habe ich vier NOUS A8T erfolgreich übernommen.
-Die letzte, eigenständige Implementierung dieses Repositories wurde gebaut und
-hostgeprüft; nur dieser neue Gesamtpfad ist noch nicht an einem unveränderten Gerät
-getestet, da alle vier verfügbaren NOUS bereits umgestellt sind. Die bisherigen
-Erfolge sind praktische Erfahrungen mit dem Vorgänger, kein Gerätetest dieser
-letzten Implementierung.
+Die PC-Vorprüfung und der einmalige SafeBoot-Upload sind in `tools/NousTakeover.py` implementiert; Bedienung im Projekt-README. Die abschließende Prüfung verlangt den neuen Rescue-Status einschließlich unveränderter Geräte-MAC. Der eigenständige Ablauf ist gebaut und hostgeprüft; der vollständige Test an einem unveränderten Gerät steht noch aus.
 
 ## Unterstützte Eingangsbasis
 
@@ -83,16 +76,6 @@ Es gibt abweichende SafeBoot-Partitionierungen und benutzerdefinierte Builds:
 [Tasmota SafeBoot-Dokumentation](https://tasmota.github.io/docs/Safeboot/).
 Für NOUS A8T gilt ausschließlich die 4-MiB-Geometrie aus `partitions.csv`.
 
-Die historisch verwendete Eingangsbasis war `14.3.0.1 (tasmota32)`, Build
-`2024-11-05T10:09:04`. `OriginalFirmware.json` enthält die geprüfte Original-Bootloader-
-und Partitionstabellenidentität aus dem damaligen Originaldump, keine Herstellerbinaries
-oder Konfiguration. Die Versions-/Buildangabe stammt aus dem archivierten Konsolenlog;
-die entsprechenden Felder des ESP-App-Descriptors im Dump sind leer. Der Bootloader
-ist als ESP32-DIO-Image samt Checksumme, angehängtem Digest und gelöschtem Restbereich
-geprüft; die Partitionstabelle samt MD5 entspricht exakt `partitions.csv`.
+Die unterstützte Referenzfirmware ist `14.3.0.1 (tasmota32)`, Build `2024-11-05T10:09:04`. `OriginalFirmware.json` legt die erforderlichen Bootloader- und Partitionstabellenidentitäten fest. Sie enthält keine Firmwarebinaries oder Gerätekonfiguration. Der akzeptierte Bootloader ist ein ESP32-DIO-Image mit gültiger Checksumme und angehängtem Digest; die Partitionstabelle einschließlich MD5 muss `partitions.csv` entsprechen.
 
-Damit ist eine konkrete Eingangsbasis identifiziert. Andere SafeBoot-Versionen benötigen
-eine belegte kompatible Bootloader-/Layoutidentität. Ein normaler Tasmota-App-Update
-beweist keinen Wechsel des Bootloaders. Die Takeover muss den vorhandenen Loader und
-das Layout direkt prüfen; der PC prüft vor OTA die noch laufende Tasmota und den
-SafeBoot-Uploadweg. Historische HTML-Dateien und Originaldump sind keine Buildvoraussetzung.
+Andere SafeBoot-Versionen benötigen eine kompatible Bootloader-/Layoutidentität. Ein normales Tasmota-App-Update belegt keine Kompatibilität von Bootloader oder Partitionierung. Takeover prüft den tatsächlichen Loader und das Layout; der PC prüft vor OTA die laufende Tasmota und den SafeBoot-Uploadweg.

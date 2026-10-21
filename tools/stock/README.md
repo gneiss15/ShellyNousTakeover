@@ -1,43 +1,26 @@
-# Shelly-Stock-Firmware vorbereiten
+<!-- tools/stock/README.md, Version: 1.02 -->
+# Prepare Shelly manufacturer firmware
 
-Version: 1.01
+[Deutsch](README.DE.md)
 
-Die geprüfte Paketidentität steht in ../../ShellyTakeover/StockFirmware.layout.json,
-die erlaubten Eingangs-Builds in ../../ShellyTakeover/StockUpdatePolicy.json.
-ValidateFirmwareLayout.py prüft Paket, Komponenten und Partitionierung.
-StockFirmware.py und ShellyTakeover.py sind der eigenständige PC-Ablauf; keine
-externen Projektquellen oder Capture-Dateien werden zur Laufzeit benötigt.
+These tools support preparation of the pinned Shelly stock firmware. The normal operating procedure is in the [main README](../../README.md); use [ShellyTakeover.py](../ShellyTakeover.py) as the entry point.
 
-Der Startablauf:
+## Tools and policy files
 
-1. SHELLY_IP lesen und unterstütztes Herstellergerät/Firmware feststellen.
-2. Exakte Zielversion samt Build feststellen, nicht „neueste Version“ verwenden.
-3. Bei identischem Ziel direkt fortfahren; bei älterer Version einen geprüften
-   Hersteller-Updateweg anbieten. Andere Builds derselben Version separat behandeln.
-4. Bei neuerer Version Downgrade nur anbieten, wenn Herstellerweg, Paket und
-   Ausgangsversion dafür ausdrücklich geprüft sind. Sonst klar abbrechen.
-5. Zielpaket über authentifiziertes HTTPS beschaffen und gegen festgelegte
-   Paketidentität/Manifest/Partitionierung prüfen; nicht auf veränderliche
-   Stable-Descriptorangaben als alleinige Vertrauensquelle verlassen.
-6. Update nur nach Nutzerwahl, anschließend Version/Build/Geräteidentität erneut
-   prüfen. Erst dann Takeover bauen/hochladen bzw. den Upload freigeben.
+| File | Purpose |
+| --- | --- |
+| [ValidateFirmwareLayout.py](ValidateFirmwareLayout.py) | Checks a stock package, its components and partition layout against the pinned package identity. |
+| [ServeFirmware.py](ServeFirmware.py) | Serves exactly one specified package over HTTP; helper for a controlled local transfer. |
+| [StockFirmware.py](../StockFirmware.py) | Retrieves and validates the pinned manufacturer firmware and checks the update flow. |
+| [StockUpdatePolicy.json](../../ShellyTakeover/StockUpdatePolicy.json) | Specifies accepted source builds and the exact update target. |
+| [StockFirmware.layout.json](../../ShellyTakeover/StockFirmware.layout.json) | Specifies package identity, components and partition layout. |
 
-Update/Downgrade kann bereits herstellerseitig Bootloader oder Partitionstabelle
-ändern. Der erfolgreiche Download beweist daher keinen sicheren Geräteweg.
-Die Versionsvorbereitung ist jetzt in `../StockFirmware.py` und
-`../ShellyTakeover.py` implementiert. Bedienung: Projekt-README.
-`StockUpdatePolicy.json` erlaubt ausschließlich die beobachtete Factory-Version
-`1.8.99-plugmg3prod0 / 20251209-070625/geeb7eab` als Eingang zum gepinnten Ziel.
-Unbekannte Zwischenstände und Downgrades bleiben gesperrt.
+## Procedure
 
-Kein veränderlicher Stable-Descriptor und keine alten Capture-Dateien als neue
-Buildvoraussetzung. Das Zielpaket wird per zertifikatsgeprüftem HTTPS geladen,
-gegen die festgelegte vollständige Paketidentität und danach gegen Manifest,
-Komponenten und Partitionierung geprüft. Erst dann wird es atomar in den ignorierten
-Cache übernommen; bei Fehlern werden temporäre Dateien entfernt. Vorhandene Pakete
-werden bei jeder Nutzung geprüft. Kein unsicherer TLS-Fallback.
+1. Select the device through `SHELLY_IP` and check its model, firmware version and build.
+2. Continue with takeover preflight if the build is already accepted. For an allowed older build, offer only the explicitly supported manufacturer update path. Unknown intermediate builds and downgrades remain blocked.
+3. Retrieve the exact target package over certificate-verified HTTPS, or supply an existing official package with `--stock-package`.
+4. Check package identity, manifest, components and partition layout. Cached packages are checked again before every use.
+5. Perform a manufacturer update only with `--execute --update-stock`. Recheck version, build and device identity before continuing takeover.
 
-Der reale HTTPS-Test auf diesem PC scheiterte an einer nicht prüfbaren Issuer-Kette.
-Das schon vorhandene offizielle Paket wurde separat vollständig geprüft und als
-lokaler generierter Cache wiederverwendet. Dies ist kein bestätigter neuer Download
-und kein neuer Gerätetest. Ein Paketpfad kann alternativ explizit angegeben werden.
+The cache is under the ignored `generated/` directory. Changing stable descriptors do not replace a pinned package identity; there is no insecure TLS fallback. A validated download alone does not establish a supported update path: the actual source build must also match the policy. Manufacturer updates may change the bootloader or partition layout.

@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyNousTakeover
 
-Document version: 1.25
+Document version: 1.26
 
 ShellyNousTakeover converts a supported Shelly Plug M Gen3 or NOUS A8T to a system with a standalone Rescue app and hardware Safe Boot. Takeover contains the final bootloader and Rescue. After successful takeover, a compatible Main app can be installed through Rescue.
 
@@ -31,6 +31,8 @@ This license applies only to project-owned components. Third-party components re
 The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Main app with its own web status, safely switched-off relay, and return to Rescue. They use the same toolchain, private configuration, and signing setup. The full TmrSw applications are maintained in AquariumControl as described above.
 
 **Physical testing still pending:** a fresh Shelly takeover with the writable calibration partition, MiniMain on both device families, the complete NOUS flow, and additional invalid-Main or unusable-filesystem scenarios. Host tests do not replace these device tests.
+
+The target layout makes the calibration partition writable. Writing modified Shelly calibration values and restoring the originals have not yet been tested on a device.
 
 ## DeviceType
 
@@ -227,6 +229,8 @@ For Shelly, stock OTA installs Takeover and its blank filesystem first. Takeover
 After verified Rescue startup, takeover is complete and Main is considered empty. There is no stock rollback service in Rescue. Migration rollback is limited to failures before that point and the verified data available for the respective device; it is not a guarantee of restoring the original manufacturer firmware.
 
 ## Structure
+
+Tool descriptions: [Tools](tools/README.md).
 
 - ShellyTakeover/: Shelly takeover, bootloader, Rescue, and partition tables.
 - NousTakeover/: NOUS takeover, bootloader, and Rescue.

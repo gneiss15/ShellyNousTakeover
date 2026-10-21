@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # NousTakeover
 
-Version: 1.10
+Version: 1.11
 
 The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the repository root (`ShellyNousTakeover/`):
 
@@ -45,12 +45,12 @@ The shared state machine supports the Nous order Rescue → bootloader → Rescu
 
 The app checks real chip/flash/security/slot data, original bootloader identity, partition table, existing SafeBoot image, boot selection, and payloads. Rescue is checked in full, including the erased remainder. Preserved areas (flash pre-area, partition table/NVS, running Main, and filesystem) are independently compared before and after the flow. The bootloader and OTA partition are saved for bounded error rollback. The old SafeBoot app is not saved: rollback means a verified boot path to the running Takeover, not restoration of the original Tasmota or its old SafeBoot app.
 
-The PC precheck and one-time SafeBoot upload are implemented in `tools/NousTakeover.py`; see the project README for operation. Final verification requires the new Rescue status, including an unchanged device MAC. I successfully converted four NOUS A8T devices with the earlier migration procedure. The latest standalone implementation in this repository has been built and host-tested; only this new overall flow still lacks a test on an unmodified device, because all four available NOUS devices are already converted. Those earlier successes are practical experience with the predecessor, not a hardware test of this latest implementation.
+The PC precheck and one-time SafeBoot upload are implemented in `tools/NousTakeover.py`; see the project README for operation. Final verification requires the new Rescue status, including an unchanged device MAC. The standalone flow has build and host-test coverage; a complete test on an unmodified device is still pending.
 
 ## Supported input baseline
 
 Tasmota with an actual SafeBoot layout is required. Tasmota introduced SafeBoot in version 12; the version number alone does not approve a layout. Other SafeBoot partition layouts and custom builds exist: [Tasmota SafeBoot documentation](https://tasmota.github.io/docs/Safeboot/). For NOUS A8T, only the 4 MiB geometry in `partitions.csv` is supported.
 
-The historically used input baseline was `14.3.0.1 (tasmota32)`, build `2024-11-05T10:09:04`. `OriginalFirmware.json` contains the verified original bootloader and partition-table identity from the original dump at that time, not manufacturer binaries or configuration. The version/build value comes from the archived console log; the corresponding fields in the ESP app descriptor in the dump are empty. The bootloader was verified as an ESP32-DIO image with checksum, appended digest, and erased remainder; the partition table and MD5 exactly match `partitions.csv`.
+The supported reference firmware is `14.3.0.1 (tasmota32)`, build `2024-11-05T10:09:04`. `OriginalFirmware.json` specifies the required bootloader and partition-table identities. It contains no firmware binaries or device configuration. The accepted bootloader is an ESP32-DIO image with valid checksum and appended digest; the partition table, including MD5, must match `partitions.csv`.
 
-This identifies one specific input baseline. Other SafeBoot versions require evidence of a compatible bootloader/layout identity. A normal Tasmota app update does not prove the bootloader changed. Takeover must inspect the existing loader and layout directly; before OTA, the PC checks the still-running Tasmota and SafeBoot upload path. Historical HTML files and the original dump are not build prerequisites.
+Other SafeBoot versions require a compatible bootloader/layout identity. A normal Tasmota app update does not prove that its bootloader or partition layout is compatible. Takeover checks the actual loader and layout; before OTA, the PC checks the running Tasmota and SafeBoot upload path.
