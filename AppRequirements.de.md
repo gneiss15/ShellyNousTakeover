@@ -2,7 +2,7 @@ English version is [here](AppRequirements.md).
 
 # Anforderungen an eine spätere Main-App
 
-Version: 1.04
+Version: 1.05
 
 Die folgenden Geometrien entsprechen den eigenständigen Bootloader-/Rescue-Builds.
 Die neue Laufzeit ist noch am Gerät zu prüfen. Adressen sind absolute Flashadressen; Größen in Bytes.
@@ -30,7 +30,7 @@ Insbesondere Factory-Daten nicht löschen oder durch Daten eines anderen Geräts
 Die **gelinkte SDK-Laufzeit** muss die Partitionstabelle bei 0x10000 lesen;
 allein eine passende CSV reicht nicht. Vorgebaute SDKs mit 0x8000 passen nicht.
 
-## NOUS A8T: ESP32, 4 MiB
+## Nous A8T: ESP32, 4 MiB
 
 | Verwendung | Offset | Größe |
 |---|---:|---:|

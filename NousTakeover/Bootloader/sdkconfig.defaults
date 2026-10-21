@@ -1,5 +1,5 @@
-# sdkconfig.defaults, Version: 1.00
-# ESP32 / NOUS A8T: 4 MB flash, DIO, 40 MHz
+# sdkconfig.defaults, Version: 1.01
+# ESP32 / Nous A8T: 4 MB flash, DIO, 40 MHz
 CONFIG_ESPTOOLPY_FLASHMODE_DIO=y
 CONFIG_ESPTOOLPY_FLASHFREQ_40M=y
 CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y

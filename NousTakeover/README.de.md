@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # NousTakeover
 
-Version: 1.11
+Version: 1.12
 
 Bootloader, Rescue und automatische Takeover-App sind eigenständige ESP-IDF-Projekte.
 Environment und private Konfiguration: [Haupt-README](../README.de.md). Nach deren
@@ -19,7 +19,7 @@ Installation siehe unten; aktuelle Testgrenzen stehen in der [Haupt-README](../R
 
 ## Artefaktinhalt und Installation
 
-`generated/NousTakeover/App/Takeover.bin` ist relativ zum Repository-Hauptverzeichnis angegeben. Das rohe ESP-App-Image enthält die automatische Takeover, den neuen Bootloader, Rescue und die erwarteten Partitionstabellendaten als eingebettete Payloads. NOUS verwendet diese einzelne `.bin`-Datei statt eines ZIP-Pakets. Die vorhandene Partitionstabelle wird geprüft und beibehalten.
+`generated/NousTakeover/App/Takeover.bin` ist relativ zum Repository-Hauptverzeichnis angegeben. Das rohe ESP-App-Image enthält die automatische Takeover, den neuen Bootloader, Rescue und die erwarteten Partitionstabellendaten als eingebettete Payloads. Nous verwendet diese einzelne `.bin`-Datei statt eines ZIP-Pakets. Die vorhandene Partitionstabelle wird geprüft und beibehalten.
 
 Das Image am generierten Pfad belassen und über das PC-Skript durch Tasmota SafeBoot installieren. Nach Erfüllen der Voraussetzungen und Setzen der Env-Variablen einschließlich `NOUS_IP` gemäß [Haupt-README](../README.de.md#pc-vorprüfung-und-übernahme) aus dem Repository-Hauptverzeichnis ausführen:
 
@@ -74,7 +74,7 @@ Erforderlich ist Tasmota mit tatsächlich vorhandenem SafeBoot-Layout. Tasmota f
 SafeBoot in Version 12 ein; die Versionsnummer allein ist keine Layoutfreigabe.
 Es gibt abweichende SafeBoot-Partitionierungen und benutzerdefinierte Builds:
 [Tasmota SafeBoot-Dokumentation](https://tasmota.github.io/docs/Safeboot/).
-Für NOUS A8T gilt ausschließlich die 4-MiB-Geometrie aus `partitions.csv`.
+Für Nous A8T gilt ausschließlich die 4-MiB-Geometrie aus `partitions.csv`.
 
 Die unterstützte Referenzfirmware ist `14.3.0.1 (tasmota32)`, Build `2024-11-05T10:09:04`. `OriginalFirmware.json` legt die erforderlichen Bootloader- und Partitionstabellenidentitäten fest. Sie enthält keine Firmwarebinaries oder Gerätekonfiguration. Der akzeptierte Bootloader ist ein ESP32-DIO-Image mit gültiger Checksumme und angehängtem Digest; die Partitionstabelle einschließlich MD5 muss `partitions.csv` entsprechen.
 

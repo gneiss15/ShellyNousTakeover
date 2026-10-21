@@ -2,16 +2,16 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Dokumentversion: 1.27
+Dokumentversion: 1.28
 
-ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder NOUS A8T
+ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder Nous A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
 den finalen Bootloader und die Rescue. Nach erfolgreicher Übernahme kann eine
 passende Haupt-App über die Rescue installiert werden.
 
-**Entwicklungsstand:** Work in progress. Shelly-Übernahme, Rescue-Start und Taster-Safe-Boot sind am unterstützten Gerät geprüft. Der neue eigenständige NOUS-Ablauf ist gebaut und hostgeprüft; sein vollständiger Test an einem unveränderten Gerät steht noch aus.
+**Entwicklungsstand:** Work in progress. Shelly-Übernahme, Rescue-Start und Taster-Safe-Boot sind am unterstützten Gerät geprüft. Der neue eigenständige Nous-Ablauf ist gebaut und hostgeprüft; sein vollständiger Test an einem unveränderten Gerät steht noch aus.
 
-Produktversionen stehen zentral in `Versions.txt` im Repository-Stamm: Shelly- und NOUS-App/Rescue sowie das MiniMain-Beispiel haben jeweils einen eigenen Eintrag. IDF-Projektkennung, Rescue-Status, Paketprüfung und PC-seitige Checks lesen diese Werte. Generierte Artefakte werden nicht direkt bearbeitet und Produktversionen nicht zusätzlich an anderer Stelle eingetragen.
+Produktversionen stehen zentral in `Versions.txt` im Repository-Stamm: Shelly- und Nous-App/Rescue sowie das MiniMain-Beispiel haben jeweils einen eigenen Eintrag. IDF-Projektkennung, Rescue-Status, Paketprüfung und PC-seitige Checks lesen diese Werte. Generierte Artefakte werden nicht direkt bearbeitet und Produktversionen nicht zusätzlich an anderer Stelle eingetragen.
 
 ## Rückmeldungen willkommen
 
@@ -38,19 +38,19 @@ beschriebenen Hardware- und Stromausfallrisiken.
 
 ## Beispiel-Apps
 
-Die [Mini-Examples für Shelly und NOUS](Examples/README.de.md) zeigen eine baubare
+Die [Mini-Examples für Shelly und Nous](Examples/README.de.md) zeigen eine baubare
 Main-App mit eigenem Webstatus, sicher ausgeschaltetem Relais und Rückwechsel zu
 Rescue. Sie verwenden dieselbe Toolchain, private Konfiguration und Signierung.
 Die vollständigen TmrSw-Anwendungen werden in AquariumControl gepflegt, siehe oben.
 
-**Noch nicht praktisch geprüft:** eine frische Shelly-Übernahme mit der beschreibbaren Kalibrierpartition, MiniMain auf beiden Gerätefamilien, der vollständige NOUS-Ablauf sowie zusätzliche Fehlerfälle mit ungültiger Main oder unbrauchbarem Dateisystem. Hosttests ersetzen diese Gerätetests nicht.
+**Noch nicht praktisch geprüft:** eine frische Shelly-Übernahme mit der beschreibbaren Kalibrierpartition, MiniMain auf beiden Gerätefamilien, der vollständige Nous-Ablauf sowie zusätzliche Fehlerfälle mit ungültiger Main oder unbrauchbarem Dateisystem. Hosttests ersetzen diese Gerätetests nicht.
 
 Die Kalibrierpartition ist im Ziel-Layout beschreibbar. Das tatsächliche Schreiben geänderter Shelly-Kalibrierwerte und ihre Wiederherstellung sind noch nicht am Gerät geprüft.
 
 ## DeviceType
 
 Der DeviceType beschreibt die Upload-Kompatibilität, unabhängig von Gerätename und
-Takeover-Projektname. Standard: Shelly `TmrSwShellyC3V1`, NOUS `TmrSwA8T`.
+Takeover-Projektname. Standard: Shelly `TmrSwShellyC3V1`, Nous `TmrSwA8T`.
 Ein anderer Typ wird vor dem Build und dem PC-Übernahmeaufruf ausdrücklich gesetzt:
 
 ```bash
@@ -66,7 +66,7 @@ PC-Abschlussprüfung müssen denselben Typ verwenden. Eine Environment-Änderung
 
 Der Bootloader startet die Rescue App, wenn der Gerätetaster beim Einschalten bzw.
 Reset mindestens eine Sekunde gehalten wird. Zur sicheren Bedienung den Taster
-mindestens zwei Sekunden halten. Taster: Shelly GPIO7, NOUS A8T GPIO4, jeweils LOW
+mindestens zwei Sekunden halten. Taster: Shelly GPIO7, Nous A8T GPIO4, jeweils LOW
 bei gedrücktem Taster.
 
 Dieser Rettungsweg funktioniert unabhängig von der Haupt-App und ihrem Dateisystem.
@@ -101,7 +101,7 @@ Shelly-Ausgangspunkt: Plug M Gen3 / S3PL-30110EU, ESP32-C3 Revision 4, 8 MiB,
 Stock PlugMG3 2.0.0 / 20260710-101147/2.0.0-g87fbfa4 oder
 2.0.1 / 20260923-075548/2.0.1-ge1a198b in app_0. Beide exakten Builds werden
 direkt akzeptiert; bei 2.0.0 ist kein vorheriges Stock-Update erforderlich.
-NOUS-Ausgangspunkt: A8T mit der passenden Tasmota-Partitionstabelle gemäß
+Nous-Ausgangspunkt: A8T mit der passenden Tasmota-Partitionstabelle gemäß
 [AppRequirements.md](AppRequirements.de.md).
 
 Der PC darf per Ethernet verbunden sein. Beim Shelly muss auch das Gerät den
@@ -161,10 +161,10 @@ Vor einem Aufruf die Beispielpfade und Geräteadresse ersetzen:
 export TAKEOVER_PRIVATE_DIR="$HOME/takeover-private"
 export TAKEOVER_IDF_PATH="$HOME/tools/esp-idf-v5.5.1"
 export TAKEOVER_IDF_TOOLS_PATH="$HOME/tools/espressif"
-# Optionaler DeviceType für Shelly; für NOUS siehe unten.
+# Optionaler DeviceType für Shelly; für Nous siehe unten.
 export TAKEOVER_DEVICE_TYPE="TmrSwShellyC3V1"
 export SHELLY_IP="192.168.1.50"
-# Für NOUS statt SHELLY_IP:
+# Für Nous statt SHELLY_IP:
 export NOUS_IP="192.168.1.51"
 ```
 
@@ -172,8 +172,8 @@ TAKEOVER_PRIVATE_DIR enthält Secrets.local.json sowie private.key/public.key.
 
 `TAKEOVER_DEVICE_TYPE` ist optional und gilt für den jeweiligen Build und
 PC-Übernahmeaufruf. Ohne gesetzte Variable wird der Typ aus `<Ziel>/DeviceType.txt`
-verwendet: Shelly `TmrSwShellyC3V1`, NOUS `TmrSwA8T`.
-Für NOUS den obigen Shelly-Wert vor dessen Build/Aufruf ersetzen:
+verwendet: Shelly `TmrSwShellyC3V1`, Nous `TmrSwA8T`.
+Für Nous den obigen Shelly-Wert vor dessen Build/Aufruf ersetzen:
 
 ```bash
 export TAKEOVER_DEVICE_TYPE="TmrSwA8T"
@@ -241,7 +241,7 @@ Nach Setzen der Pfade und Geräte-IP die vollständige Takeover bauen:
 
 ```bash
 bash tools/BuildTakeover.sh shelly
-# Für NOUS stattdessen:
+# Für Nous stattdessen:
 bash tools/BuildTakeover.sh nous
 ```
 
@@ -249,7 +249,7 @@ Lesende Vorprüfung am Gerät, ohne Neustart oder Upload:
 
 ```bash
 python3 tools/ShellyTakeover.py
-# Für NOUS:
+# Für Nous:
 python3 tools/NousTakeover.py
 ```
 
@@ -260,7 +260,7 @@ nach dem Update wird Slot 0 erneut zwingend geprüft. Beim bekannten Factory-Bui
 `20251209-070625/geeb7eab` bietet er das geprüfte Update auf den exakten Stock-Build
 2.0.1 an. Ohne Schreiboption führt er weder Download noch Update aus. Unbekannte
 Zwischenstände, andere Builds und Downgrades werden abgewiesen.
-Der NOUS-Check verlangt die bekannte Tasmota-Version samt Build aus
+Der Nous-Check verlangt die bekannte Tasmota-Version samt Build aus
 [NousTakeover/README.md](NousTakeover/README.de.md), 4 MiB Flash, aktives A8T-GPIO-Template,
 LAN-Adresse und den SafeBoot-/Datei-Uploadweg. Original-Bootloader und Partitionstabelle
 prüft anschließend die Takeover direkt am Gerät.
@@ -272,7 +272,7 @@ angeschlossene Verbraucher trennen:
 
 ```bash
 python3 tools/ShellyTakeover.py --execute
-# Für NOUS stattdessen:
+# Für Nous stattdessen:
 python3 tools/NousTakeover.py --execute
 ```
 
@@ -316,7 +316,7 @@ Shelly: Das Skript stellt ausschließlich das gebaute OTA-Paket an einem lokalen
 HTTP-Port bereit und sendet einmal Shelly.Update. Die passende LAN-Adresse des PCs
 wird automatisch gewählt; bei mehreren Netzen kann TAKEOVER_HTTP_HOST die erreichbare
 IPv4-Adresse festlegen. Die Firewall muss diesen vom Skript gewählten Port erlauben.
-NOUS: Das Skript wechselt zuerst nach SafeBoot, bestätigt diesen Zustand und lädt
+Nous: Das Skript wechselt zuerst nach SafeBoot, bestätigt diesen Zustand und lädt
 danach einmal die Takeover-Datei hoch. Es sendet keinen Upload an die normale Main.
 
 Beide Skripte warten auf den JSON-Status der neuen Rescue und prüfen Geräte-MAC,
@@ -337,7 +337,7 @@ Vor dem Schreiben prüft Takeover Hardware/Security, Original-Bootloader, Partit
 
 Der Shelly-Dual-Bootloader bleibt der finale Bootloader und unterstützt die originale sowie die migrierte Partitionstabelle. Ein späterer Bootloader-Austausch ist nicht erforderlich. Die dokumentierten Build- und Migrationsskripte verwenden; generisches `idf.py flash` kann die benötigte Partitionierung oder Rescue überschreiben. Das Repository baut unabhängig von den älteren Prjs-Projektbäumen.
 
-Beim Shelly installiert Stock-OTA zuerst Takeover und deren leeres Dateisystem. Takeover prüft und schreibt bei Bedarf den finalen Bootloader, bereitet Rescue und NVS-/OTA-Metadaten vor, schreibt die neue Partitionstabelle und startet Rescue. Beim NOUS schreibt und prüft Takeover zuerst Rescue, danach Bootloader und Rescue-Bootauswahl; die unterstützte Partitionstabelle bleibt unverändert.
+Beim Shelly installiert Stock-OTA zuerst Takeover und deren leeres Dateisystem. Takeover prüft und schreibt bei Bedarf den finalen Bootloader, bereitet Rescue und NVS-/OTA-Metadaten vor, schreibt die neue Partitionstabelle und startet Rescue. Beim Nous schreibt und prüft Takeover zuerst Rescue, danach Bootloader und Rescue-Bootauswahl; die unterstützte Partitionstabelle bleibt unverändert.
 
 Nach geprüftem Rescue-Start ist die Übernahme abgeschlossen und Main gilt als leer. Rescue bietet keinen Stock-Rollback-Service. Die Migrationsrücknahme beschränkt sich auf Fehler vor diesem Abschluss und die für das jeweilige Gerät verfügbaren geprüften Daten; sie garantiert keine Wiederherstellung der originalen Hersteller-Firmware.
 
@@ -346,7 +346,7 @@ Nach geprüftem Rescue-Start ist die Übernahme abgeschlossen und Main gilt als 
 Werkzeugbeschreibungen: [Werkzeugübersicht](tools/README.DE.md).
 
 - ShellyTakeover/: Shelly-Takeover, Bootloader, Rescue und Partitionstabellen.
-- NousTakeover/: NOUS-Takeover, Bootloader und Rescue.
+- NousTakeover/: Nous-Takeover, Bootloader und Rescue.
 - common/: gemeinsame Konfiguration und Updatebausteine.
 - tools/: Toolchain-Einrichtung, Build und Hersteller-Upload.
 - generated/: lokale Build-/Diagnoseausgaben; nicht veröffentlichen.
@@ -375,7 +375,7 @@ Nach Setzen der Pfade und vollständiger privater WLAN-Konfiguration:
 ```bash
 bash tools/BuildBootloader.sh shelly
 bash tools/BuildRescue.sh shelly
-# Für NOUS:
+# Für Nous:
 bash tools/BuildBootloader.sh nous
 bash tools/BuildRescue.sh nous
 python3 tools/VerifyBuild.py

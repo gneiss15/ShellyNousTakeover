@@ -1,5 +1,5 @@
-# partitions.csv, Version: 1.00
-# Exact NOUS A8T / Tasmota 4 MB layout
+# partitions.csv, Version: 1.01
+# Exact Nous A8T / Tasmota 4 MB layout
 # Name,     Type, SubType, Offset,   Size,      Flags
 nvs,        data, nvs,     0x9000,   0x5000,
 otadata,    data, ota,     0xE000,   0x2000,

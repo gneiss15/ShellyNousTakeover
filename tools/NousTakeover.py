@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# NousTakeover.py, Version: 1.02
+# NousTakeover.py, Version: 1.03
 """Read-only preflight by default; explicit manufacturer upload and Rescue verification."""
 import argparse
 import base64
@@ -63,13 +63,13 @@ def preflight(http):
     if isinstance(template.get('Template'),dict):template=template['Template']
     expected=[1,1,576,1,32,1,1,1,1,224,2624,1,1,1,1,1,0,1,1,1,0,1,2656,2720,0,0,0,0,1,1,1,1,1,0,0,1]
     gpio=template.get('GPIO')
-    if not isinstance(gpio,list) or len(gpio)!=len(expected):raise TakeoverError('Missing NOUS A8T template; no upload')
+    if not isinstance(gpio,list) or len(gpio)!=len(expected):raise TakeoverError('Missing Nous A8T template; no upload')
     # Led_i and LinkLed_i use the same inverse LED pin; other assignments must match.
     if gpio[2] not in (320,576) or gpio[:2]+[576]+gpio[3:]!=expected or template.get('BASE')!=1 or template.get('FLAG')!=0:
-        raise TakeoverError('Unexpected NOUS A8T GPIO template; no upload')
+        raise TakeoverError('Unexpected Nous A8T GPIO template; no upload')
     if str(template.get('NAME','')).replace(' ','').upper()!='NOUSA8T':raise TakeoverError('Wrong model template; no upload')
     module=http.command('Module').get('Module',{})
-    if not isinstance(module,dict) or list(module)!=['0']:raise TakeoverError('NOUS template is not the active module; no upload')
+    if not isinstance(module,dict) or list(module)!=['0']:raise TakeoverError('Nous template is not the active module; no upload')
     network=http.command('Status 5').get('StatusNET',{})
     if network.get('IPAddress')!=http.base.removeprefix('http://'):raise TakeoverError('Use the station/LAN address; no upload')
     device_mac=mac(network.get('Mac'))
@@ -146,7 +146,7 @@ def main():
     args=parser.parse_args()
     if not os.environ.get('NOUS_IP'):raise TakeoverError('Set NOUS_IP to the fixed station IPv4 address')
     http=Http(os.environ['NOUS_IP']);device_mac=preflight(http)
-    print('NOUS/Tasmota/SafeBoot preflight passed; exact flash/layout/loader guards run inside Takeover.')
+    print('Nous/Tasmota/SafeBoot preflight passed; exact flash/layout/loader guards run inside Takeover.')
     if not args.execute:
         print('Read-only check completed; no restart or upload.');return
     execute(http,device_mac,ROOT/'generated/NousTakeover/App/Takeover.bin')

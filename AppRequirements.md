@@ -2,7 +2,7 @@ Deutsche Version [hier](AppRequirements.de.md).
 
 # Requirements for a Future Main App
 
-Version: 1.04
+Version: 1.05
 
 The geometries below match the standalone bootloader/rescue builds. The new runtime still needs device testing. Addresses are absolute flash addresses; sizes are bytes. Do not flash a partition table or bootloader from a generic board profile.
 
@@ -25,7 +25,7 @@ The geometries below match the standalone bootloader/rescue builds. The new runt
 
 Unlisted gaps are not approved app/filesystem areas. In particular, do not erase factory data or replace it with data from another device. The **linked SDK runtime** must read the partition table at 0x10000; a matching CSV alone is not sufficient. Prebuilt SDKs using 0x8000 are incompatible.
 
-## NOUS A8T: ESP32, 4 MiB
+## Nous A8T: ESP32, 4 MiB
 
 | Use | Offset | Size |
 |---|---:|---:|

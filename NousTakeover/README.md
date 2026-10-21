@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # NousTakeover
 
-Version: 1.11
+Version: 1.12
 
 The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the repository root (`ShellyNousTakeover/`):
 
@@ -14,7 +14,7 @@ Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot man
 
 ## Artifact contents and installation
 
-`generated/NousTakeover/App/Takeover.bin` is relative to the repository root. It is a raw ESP app image containing the automatic Takeover, new bootloader, Rescue, and expected partition-table data as embedded payloads. NOUS uses this single `.bin` file rather than a ZIP package. The existing partition table is checked and preserved.
+`generated/NousTakeover/App/Takeover.bin` is relative to the repository root. It is a raw ESP app image containing the automatic Takeover, new bootloader, Rescue, and expected partition-table data as embedded payloads. Nous uses this single `.bin` file rather than a ZIP package. The existing partition table is checked and preserved.
 
 Keep the image at this generated path; use the PC script to install it through Tasmota SafeBoot. With the prerequisites and environment variables, including `NOUS_IP`, set according to the [main README](../README.md#pc-precheck-and-takeover), run from the repository root:
 
@@ -49,7 +49,7 @@ The PC precheck and one-time SafeBoot upload are implemented in `tools/NousTakeo
 
 ## Supported input baseline
 
-Tasmota with an actual SafeBoot layout is required. Tasmota introduced SafeBoot in version 12; the version number alone does not approve a layout. Other SafeBoot partition layouts and custom builds exist: [Tasmota SafeBoot documentation](https://tasmota.github.io/docs/Safeboot/). For NOUS A8T, only the 4 MiB geometry in `partitions.csv` is supported.
+Tasmota with an actual SafeBoot layout is required. Tasmota introduced SafeBoot in version 12; the version number alone does not approve a layout. Other SafeBoot partition layouts and custom builds exist: [Tasmota SafeBoot documentation](https://tasmota.github.io/docs/Safeboot/). For Nous A8T, only the 4 MiB geometry in `partitions.csv` is supported.
 
 The supported reference firmware is `14.3.0.1 (tasmota32)`, build `2024-11-05T10:09:04`. `OriginalFirmware.json` specifies the required bootloader and partition-table identities. It contains no firmware binaries or device configuration. The accepted bootloader is an ESP32-DIO image with valid checksum and appended digest; the partition table, including MD5, must match `partitions.csv`.
 

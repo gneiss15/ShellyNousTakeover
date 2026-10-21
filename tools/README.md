@@ -1,4 +1,4 @@
-<!-- tools/README.md, Version: 1.00 -->
+<!-- tools/README.md, Version: 1.01 -->
 # Tools
 
 [Deutsch](README.DE.md) · [Project instructions](../README.md)
@@ -15,11 +15,11 @@ Run commands from the repository root. Prerequisites and environment variables a
 | [BuildTakeover.sh](BuildTakeover.sh) | Builds the Takeover app with embedded, checked payloads. |
 | [BuildExample.sh](BuildExample.sh) | Builds the MiniMain example for the selected device family. |
 | [ShellyTakeover.py](ShellyTakeover.py) | Shelly PC flow: preflight, optional stock update, one-time upload and Rescue verification. |
-| [NousTakeover.py](NousTakeover.py) | NOUS PC flow: preflight, one-time SafeBoot upload and Rescue verification. |
+| [NousTakeover.py](NousTakeover.py) | Nous PC flow: preflight, one-time SafeBoot upload and Rescue verification. |
 | [StockFirmware.py](StockFirmware.py) | Helpers for validated manufacturer packages and stock updates. |
 | [PackageShelly.py](PackageShelly.py) | Creates the Shelly OTA package in the supported manufacturer format. |
 | [ValidateTakeoverPackage.py](ValidateTakeoverPackage.py) | Validates the Shelly Takeover package and embedded payloads. |
-| [ValidateNousTakeover.py](ValidateNousTakeover.py) | Validates the NOUS SafeBoot upload image and embedded payloads. |
+| [ValidateNousTakeover.py](ValidateNousTakeover.py) | Validates the Nous SafeBoot upload image and embedded payloads. |
 | [PreparePrivate.py](PreparePrivate.py) | Validates external credentials/keys and generates private build headers without printing their values. |
 | [DeviceTypeArtifacts.py](DeviceTypeArtifacts.py) | Generates DeviceType metadata, update artifacts and the public-key header. |
 | [BuildFiles.py](BuildFiles.py) | Writes generated build inputs only when content changes, preserving incremental builds. |
