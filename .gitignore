@@ -21,3 +21,8 @@ Secrets.local.json
 # Local design notes; public operation is documented in the READMEs.
 /Design.md
 /Design.de.md
+
+# Local verification reports and task lists are not publication sources.
+/*Results.json
+/TODO*.md
+/ToDo*.md

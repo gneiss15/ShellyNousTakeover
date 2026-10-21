@@ -2,7 +2,7 @@ English version is [here](README.md).
 
 # ShellyTakeover
 
-Version: 1.04
+Version: 1.05
 
 App/ enthält die automatische Takeover, Bootloader/ den finalen Dual-Bootloader,
 Rescue/ die eigenständige Rescue. Migration/ und LoaderWriter/ enthalten die
@@ -28,6 +28,11 @@ Das ZIP ist ein OTA-Paket für die originale Shelly-Firmware. Es enthält:
 
 Das ZIP enthält keinen separaten Bootloader- oder Partitionstabellen-OTA-Teil. Stock installiert das App-/Dateisystempaket; die laufende Takeover führt anschließend selbst die geprüften Migrations-Schreibvorgänge aus.
 
+Die Ziel-Partitionstabelle lässt die physische `shelly`-Kalibrierpartition für
+die spätere Main beschreibbar. Takeover erhält deren Inhalt bytegenau; das
+beschreibbare Flag ermöglicht nur eine spätere, ausdrücklich ausgelöste
+Kalibrierung.
+
 Das ZIP über das PC-Skript verwenden und am oben genannten generierten Pfad belassen. Seine Dateien nicht einzeln entpacken und hochladen. Nach Erfüllen der Voraussetzungen und Setzen der Env-Variablen einschließlich `SHELLY_IP` gemäß [Haupt-README](../README.de.md#pc-vorprüfung-und-übernahme) diese Befehle aus dem Repository-Hauptverzeichnis ausführen:
 
 ```bash
@@ -45,4 +50,4 @@ Das Skript prüft das ZIP, stellt es vorübergehend per HTTP vom PC bereit und f
 
 Die App wartet nach AP+STA/Webstart auf eine LAN-IP und beginnt danach selbständig
 mit ihren Guards und der Übernahme. Das Paket deshalb noch nicht für einen
-unverifizierten Hardwareeinsatz verwenden. Entwicklungsstand: [TODO](../TODO.de.md).
+unverifizierten Hardwareeinsatz verwenden. Entwicklungsstand: [Haupt-README](../README.de.md).

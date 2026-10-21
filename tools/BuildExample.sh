@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# BuildExample.sh, Version: 1.01
+# BuildExample.sh, Version: 1.02
 set -Eeuo pipefail
+export GENERATED_TOOLS="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 [[ $# == 1 && ( "$1" == shelly || "$1" == nous ) ]] || { echo "Usage: $0 shelly|nous" >&2; exit 2; }
 ToolDir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$ToolDir/../common/Environment.sh"
@@ -12,18 +13,28 @@ umask 077
 mkdir -p "$MINI_GENERATED"
 DeviceType="${TAKEOVER_DEVICE_TYPE-$(cat "$TakeoverRoot/$Target/DeviceType.txt")}"
 [[ "$DeviceType" =~ ^[A-Za-z][A-Za-z0-9]{0,30}$ ]] || { echo 'Invalid TAKEOVER_DEVICE_TYPE.' >&2; exit 2; }
-printf '%s\n' "$DeviceType" > "$MINI_GENERATED/DeviceType.input.txt"
+python3 - "$ToolDir" "$DeviceType" "$MINI_GENERATED/DeviceType.input.txt" <<'PYTYPE'
+import sys
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+from BuildFiles import write_text_if_changed
+write_text_if_changed(Path(sys.argv[3]),sys.argv[2]+'\n')
+PYTYPE
 python3 "$ToolDir/DeviceTypeArtifacts.py" prepare "$MINI_GENERATED/DeviceType.input.txt" "$MINI_GENERATED/DeviceType.inc.h" "$MINI_GENERATED/DeviceType.txt"
 python3 "$ToolDir/PreparePrivate.py" "$Target" "$MINI_GENERATED"
-cp "$TakeoverRoot/$Target/Rescue/Platform.h" "$MINI_GENERATED/Platform.h"
+python3 "$ToolDir/BuildFiles.py" "$TakeoverRoot/$Target/Rescue/Platform.h" "$MINI_GENERATED/Platform.h"
 python3 - "$TakeoverRoot" "$Target" "$MINI_GENERATED" <<'PY'
+import sys as _generated_sys
+import os as _generated_os
+_generated_sys.path.insert(0, _generated_os.environ['GENERATED_TOOLS'])
+from BuildFiles import write_text_if_changed, write_bytes_if_changed
 from pathlib import Path
 import sys
 root=Path(sys.argv[1]);target=sys.argv[2];out=Path(sys.argv[3])
 text=(root/target/'Rescue/sdkconfig.defaults').read_text()
 text=text.replace('CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="../partitions.csv"',
                   'CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="'+str(root/target/'partitions.csv')+'"')
-(out/'sdkconfig.defaults').write_text(text)
+write_text_if_changed(out/'sdkconfig.defaults', text)
 PY
 python3 "$ToolDir/VerifyToolchain.py" --target "$1"
 source "$TAKEOVER_IDF_PATH/export.sh" > "$MINI_GENERATED/Environment.log" 2>&1

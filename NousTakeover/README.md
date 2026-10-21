@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # NousTakeover
 
-Version: 1.09
+Version: 1.10
 
 The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projects. Environment and private configuration: [../README.md](../README.md). After setting them up, build from the repository root (`ShellyNousTakeover/`):
 
@@ -10,7 +10,7 @@ The bootloader, Rescue, and automatic Takeover app are standalone ESP-IDF projec
 bash tools/BuildTakeover.sh nous
 ```
 
-Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot manufacturer upload. This input format is the raw ESP app image; later Rescue uploads require signed artifacts. The build script does not upload to a device. Installation is described below; open tests: [TODO](../TODO.md).
+Output is `generated/NousTakeover/App/Takeover.bin` for the Tasmota SafeBoot manufacturer upload. This input format is the raw ESP app image; later Rescue uploads require signed artifacts. The build script does not upload to a device. Installation is described below; current testing limits are described in the [main README](../README.md).
 
 ## Artifact contents and installation
 

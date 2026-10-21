@@ -2,19 +2,21 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyNousTakeover
 
-Document version: 1.21
+Document version: 1.24
 
 ShellyNousTakeover converts a supported Shelly Plug M Gen3 or NOUS A8T to a system with a standalone Rescue app and hardware Safe Boot. Takeover contains the final bootloader and Rescue. After successful takeover, a compatible Main app can be installed through Rescue.
 
-**Development status:** Shelly takeover through verified Rescue startup has been performed on a fresh device. The exact test scope is in [HardwareTestResults.json](HardwareTestResults.json); current work is tracked in [TODO.md](TODO.md).
-
-With the earlier NOUS A8T migration procedure, I successfully converted four devices. The new, standalone NOUS implementation in this repository has been built and host-tested, but this latest overall flow has not yet been tested on an unmodified device: my four NOUS devices are already converted. The outstanding hardware test therefore concerns this implementation version, not whether NOUS takeover has ever worked.
+**Development status:** Work in progress. Shelly takeover, Rescue startup and button Safe Boot have been checked on the supported device. The new standalone NOUS flow has build and host-test coverage; its complete test on an unmodified device is still pending.
 
 Product versions are maintained in the repository-root `Versions.txt`: Shelly and NOUS App/Rescue images and the MiniMain example each have their own entry. IDF project descriptors, Rescue status, package validation, and PC-side checks read those entries; do not edit generated artifacts or add separate version literals.
 
 ## Feedback welcome
 
 I explicitly welcome feedback: experiences with supported devices, problems, unclear instructions, and suggestions for improvement. Please use [GitHub Issues](https://github.com/gneiss15/ShellyNousTakeover/issues). For technical reports, include the device model, original firmware version/build, the step involved, and the error message. Successful tests are welcome too. Remove WLAN credentials, passwords, and private keys from any logs or attachments before posting.
+
+## AquariumControl
+
+The complete aquarium applications are maintained in [AquariumControl](https://github.com/gneiss15/AquariumControl): [TmrSwShelly](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwShelly), [TmrSwA8T](https://github.com/gneiss15/AquariumControl/tree/main/Aq/TmrSwA8T), feeders, MultiTimer and Dashboard. ShellyNousTakeover provides initial takeover and entry into Rescue; AquariumControl provides the Main applications. AquariumControl is a work in progress; feedback and test reports are welcome.
 
 ## License
 
@@ -26,7 +28,9 @@ This license applies only to project-owned components. Third-party components re
 
 ## Example apps
 
-The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Main app with its own web status, safely switched-off relay, and return to Rescue. They use the same toolchain, private configuration, and signing setup. Separate repositories for complete **TmrSwShelly** and **TmrSwA8T** examples are planned but not yet published. Links will be added when they are created.
+The [Mini Examples for Shelly and NOUS](Examples/README.md) show a buildable Main app with its own web status, safely switched-off relay, and return to Rescue. They use the same toolchain, private configuration, and signing setup. The full TmrSw applications are maintained in AquariumControl as described above.
+
+**Physical testing still pending:** MiniMain on both device families, the complete NOUS flow, and additional invalid-Main or unusable-filesystem scenarios. Host tests do not replace these device tests.
 
 ## DeviceType
 

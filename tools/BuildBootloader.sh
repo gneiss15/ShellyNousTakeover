@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# BuildBootloader.sh, Version: 1.01
+# BuildBootloader.sh, Version: 1.04
 set -Eeuo pipefail
+export GENERATED_TOOLS="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 [[ $# == 1 && ( "$1" == shelly || "$1" == nous ) ]] || { echo "Usage: $0 shelly|nous" >&2; exit 2; }
 ToolDir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 : "${TAKEOVER_IDF_PATH:?Set TAKEOVER_IDF_PATH}"
@@ -18,6 +19,10 @@ source "$TAKEOVER_IDF_PATH/export.sh" >"$Generated/Environment.log" 2>&1
 export PATH="$IDF_TOOLS_PATH/tools/riscv32-esp-elf/esp-14.2.0_20241119/riscv32-esp-elf/bin:$IDF_TOOLS_PATH/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin:$PATH"
 if [[ "$1" == shelly ]]; then
   python3 - "$Root" "$Generated" <<'PY'
+import sys as _generated_sys
+import os as _generated_os
+_generated_sys.path.insert(0, _generated_os.environ['GENERATED_TOOLS'])
+from BuildFiles import write_text_if_changed, write_bytes_if_changed, generate_output_if_changed
 from pathlib import Path
 import os, subprocess, sys
 root, out = map(Path, sys.argv[1:])
@@ -25,11 +30,11 @@ generator = Path(os.environ['IDF_PATH'])/'components/partition_table/gen_esp32pa
 text = '// Generated exact partition-table fixtures.\n'
 for name, csv in [('StockTable','StockPartitions.csv'),('RescueTable','partitions.csv')]:
     binary = out/(name+'.bin')
-    subprocess.run([sys.executable,str(generator),'--offset','0x10000',str(root/'ShellyTakeover'/csv),str(binary)],check=True)
+    generate_output_if_changed([sys.executable,str(generator),'--offset','0x10000',str(root/'ShellyTakeover'/csv),str(binary)], padding=0)
     data=binary.read_bytes(); end=data.index(b'\xeb\xeb')+32
     assert all(v==255 for v in data[end:])
     text+='static const unsigned char '+name+'[] = {'+','.join(str(v) for v in data[:end])+'};\n'
-(out/'ExpectedTables.h').write_text(text)
+write_text_if_changed(out/'ExpectedTables.h', text)
 PY
 fi
 IDF_TARGET="$Chip" idf.py -C "$Root/$Target/Bootloader" -B "$Generated/build" -D "SDKCONFIG=$Generated/sdkconfig" bootloader >"$Generated/Build.log" 2>&1 || {

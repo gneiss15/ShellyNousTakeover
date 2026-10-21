@@ -1,4 +1,4 @@
-// bootloader_start.c, Version: 1.01
+// bootloader_start.c, Version: 1.03
 #include <sys/reent.h>
 #include <string.h>
 #include "ExpectedTables.h"
@@ -52,9 +52,10 @@ void __attribute__((noreturn)) call_start_cpu0(void)
     bootloader_reset();
   const unsigned char * Expected = Layout == LayoutStock ? StockTable : RescueTable;
   const unsigned Length = Layout == LayoutStock ? sizeof(StockTable) : sizeof(RescueTable);
-  if( memcmp(BootSectors, Expected, Length) != 0 ) bootloader_reset();
-  for( unsigned Index = Length; Index < 4096; ++Index )
-    if( BootSectors[Index] != 0xFF ) bootloader_reset();
+  bool TableMatches = memcmp(BootSectors, Expected, Length) == 0;
+  for( unsigned Index = Length; Index < 4096 && TableMatches; ++Index )
+    if( BootSectors[Index] != 0xFF ) TableMatches = false;
+  if( !TableMatches ) bootloader_reset();
   // GPIO input with pull-up; LOW must persist for one second.
   const bool KeyPressed = bootloader_common_check_long_hold_gpio(7, 1) == GPIO_LONG_HOLD;
   if( Layout == LayoutRescue )

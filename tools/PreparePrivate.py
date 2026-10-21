@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-# PreparePrivate.py, Version: 1.03
+# PreparePrivate.py, Version: 1.04
 """Validate external secrets/keys and generate private headers without logging values."""
 import argparse
 import json
 import os
 from pathlib import Path
 import subprocess
+from BuildFiles import write_text_if_changed
 
 FIELDS = ('WlanSsid', 'WlanPw', 'WlanSsid2', 'WlanPw2')
 
@@ -64,9 +65,9 @@ def prepare(private, target, output):
     for name, macro in zip(FIELDS, ['SSID', 'PW', 'SSID2', 'PW2']):
         lines.append('#define ESP_RESCUE_WLAN_' + macro + ' ' + json.dumps(config[name], ensure_ascii=True))
     path = output / 'EspRescueProject.h'
-    path.touch(mode=0o600, exist_ok=True)
-    path.chmod(0o600)
-    path.write_text('\n'.join(lines) + '\n')
+    if not path.exists():path.touch(mode=0o600)
+    if path.stat().st_mode & 0o777 != 0o600:path.chmod(0o600)
+    write_text_if_changed(path, '\n'.join(lines) + '\n')
 
 
 if __name__ == '__main__':

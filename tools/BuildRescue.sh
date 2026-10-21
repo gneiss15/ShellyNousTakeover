@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# BuildRescue.sh, Version: 1.02
+# BuildRescue.sh, Version: 1.03
 set -Eeuo pipefail
+export GENERATED_TOOLS="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 [[ $# == 1 && ( "$1" == shelly || "$1" == nous ) ]] || { echo "Usage: $0 shelly|nous" >&2; exit 2; }
 ToolDir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$ToolDir/../common/Environment.sh"
@@ -14,14 +15,24 @@ mkdir -p "$Generated"
 python3 "$ToolDir/PreparePrivate.py" "$Target" "$Generated"
 DeviceType="${TAKEOVER_DEVICE_TYPE-$(cat "$TakeoverRoot/$Target/DeviceType.txt")}"
 [[ "$DeviceType" =~ ^[A-Za-z][A-Za-z0-9]{0,30}$ ]] || { echo 'Invalid TAKEOVER_DEVICE_TYPE.' >&2; exit 2; }
-printf '%s\n' "$DeviceType" > "$Generated/DeviceType.input.txt"
+python3 - "$ToolDir" "$DeviceType" "$Generated/DeviceType.input.txt" <<'PYTYPE'
+import sys
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+from BuildFiles import write_text_if_changed
+write_text_if_changed(Path(sys.argv[3]),sys.argv[2]+'\n')
+PYTYPE
 python3 "$ToolDir/DeviceTypeArtifacts.py" prepare "$Generated/DeviceType.input.txt" "$Generated/DeviceType.inc.h" "$Generated/DeviceType.txt"
 python3 "$ToolDir/DeviceTypeArtifacts.py" public-key-header "$TakeoverPrivate/public.key" "$Generated/EspUpdatePublicKey.h"
-cp "$Project/Platform.h" "$Generated/Platform.h"
+python3 "$ToolDir/BuildFiles.py" "$Project/Platform.h" "$Generated/Platform.h"
 python3 - "$Project/Platform.h" "$Generated/EspRescueHardware.h" <<'PY'
+import sys as _generated_sys
+import os as _generated_os
+_generated_sys.path.insert(0, _generated_os.environ['GENERATED_TOOLS'])
+from BuildFiles import write_text_if_changed, write_bytes_if_changed
 from pathlib import Path
 import sys
-Path(sys.argv[2]).write_text('''#pragma once
+write_text_if_changed(Path(sys.argv[2]), '''#pragma once
 #include "Platform.h"
 namespace EspRescueHardware
  {

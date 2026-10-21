@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# DeviceTypeArtifacts.py, Version: 1.02
+# DeviceTypeArtifacts.py, Version: 1.04
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import hashlib
 import re
 import struct
 import subprocess
+from BuildFiles import write_text_if_changed
 
 
 MAGIC = b"ESPDT01\0"
@@ -57,7 +58,7 @@ def WritePreparedFiles(DeviceTypeFile: Path, HeaderFile: Path, DataFile: Path) -
   DeviceType = ReadDeviceType(DeviceTypeFile)
 
   HeaderFile.parent.mkdir(parents=True, exist_ok=True)
-  HeaderFile.write_text(
+  write_text_if_changed(HeaderFile,
     "// DeviceType.inc.h, Version: 1.00\n"
     "#pragma once\n\n"
     f'#define ESP_UPDATE_DEVICE_TYPE "{DeviceType}"\n',
@@ -65,7 +66,7 @@ def WritePreparedFiles(DeviceTypeFile: Path, HeaderFile: Path, DataFile: Path) -
   )
 
   DataFile.parent.mkdir(parents=True, exist_ok=True)
-  DataFile.write_text(DeviceType + "\n", encoding="ascii")
+  write_text_if_changed(DataFile, DeviceType + "\n", encoding="ascii")
 
 
 def WriteArtifact(DeviceTypeFile: Path, ArtifactType: str,
@@ -209,7 +210,7 @@ def WritePublicKeyHeader(PublicKey: Path, OutputFile: Path) -> None:
   for Offset in range(0, len(Data), 16):
     Lines.append("  " + ", ".join(f"0x{Value:02X}" for Value in Data[Offset:Offset + 16]))
   OutputFile.parent.mkdir(parents=True, exist_ok=True)
-  OutputFile.write_text(
+  write_text_if_changed(OutputFile,
     "// EspUpdatePublicKey.h, Version: 1.00\n#pragma once\n\n"
     "#include <cstddef>\n#include <cstdint>\n\n"
     "namespace EspUpdatePublicKey\n {\n"

@@ -2,7 +2,7 @@ Deutsche Version [hier](README.de.md).
 
 # ShellyTakeover
 
-Version: 1.04
+Version: 1.05
 
 `App/` contains the automatic Takeover, `Bootloader/` the final dual bootloader, and `Rescue/` the standalone Rescue. `Migration/` and `LoaderWriter/` contain the bounded writers and host fault injection.
 
@@ -25,6 +25,10 @@ The ZIP is an OTA package for the original Shelly firmware. It contains:
 
 The ZIP contains no separate bootloader or partition-table OTA part. Stock installs the app/filesystem package; the running Takeover then performs the checked migration writes itself.
 
+The target partition table leaves the physical `shelly` calibration partition
+writable for the post-takeover Main. Takeover preserves its contents byte-for-byte;
+the writable flag only enables the later, explicit calibration operation.
+
 Use the ZIP through the PC script; keep it at the generated path above. Do not unpack or upload its individual files. With the prerequisites, environment variables, and `SHELLY_IP` set as described in the [main README](../README.md#pc-precheck-and-takeover), run these commands from the repository root:
 
 ```bash
@@ -40,4 +44,4 @@ python3 tools/ShellyTakeover.py --execute
 
 The script validates the ZIP, serves it temporarily from the PC over HTTP, and requests `Shelly.Update` once. The Shelly downloads the package; the script waits for and verifies the resulting Rescue status. Keep the PC/script running until completion. If the precheck reports a required stock update, follow the [stock-update instructions](../README.md#pc-precheck-and-takeover) first.
 
-After starting AP+STA/web, the app waits for a LAN IP and then begins its guards and takeover automatically. Do not use the package on unverified hardware. Development status: [../TODO.md](../TODO.md).
+After starting AP+STA/web, the app waits for a LAN IP and then begins its guards and takeover automatically. Do not use the package on unverified hardware. Development status: [main README](../README.md).
