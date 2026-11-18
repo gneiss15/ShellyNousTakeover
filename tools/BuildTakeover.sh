@@ -7,6 +7,10 @@ ToolDir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$ToolDir/../common/Environment.sh"
 bash "$ToolDir/BuildBootloader.sh" "$1"
 bash "$ToolDir/BuildRescue.sh" "$1"
+if [[ "$1" == shelly ]]; then
+  bash "$ToolDir/BuildBootloader.sh" shelly large
+  bash "$ToolDir/BuildRescue.sh" shelly large
+fi
 if [[ "$1" == shelly ]]; then Target=ShellyTakeover; Chip=esp32c3; else Target=NousTakeover; Chip=esp32; fi
 Generated="$TakeoverRoot/generated/$Target/App"
 umask 077
@@ -18,7 +22,7 @@ import os as _generated_os
 _generated_sys.path.insert(0, _generated_os.environ['GENERATED_TOOLS'])
 from BuildFiles import write_text_if_changed, write_bytes_if_changed, generate_output_if_changed
 from pathlib import Path
-import hashlib,json,os,subprocess,sys
+import hashlib,json,os,struct,sys
 root,out=map(Path,sys.argv[1:3]);target=sys.argv[3];built=root/'generated'/target
 span=0x6000 if target=='ShellyTakeover' else 0x7000
 loader=(built/'Bootloader/Bootloader.bin').read_bytes();assert len(loader)<=span
@@ -29,6 +33,17 @@ if target=='ShellyTakeover':
  for name in ['OldTable','NewTable']:
   table=(built/'Bootloader'/('StockTable.bin' if name=='OldTable' else 'RescueTable.bin')).read_bytes()
   write_bytes_if_changed(out/(name+'.bin'), table.ljust(4096,b'\xff'))
+ large_loader=(built/'BootloaderLarge/Bootloader.bin').read_bytes()
+ assert len(large_loader)<=span
+ large_loader=large_loader.ljust(span,b'\xff')
+ large_rescue=(built/'RescueLarge/Rescue.bin').read_bytes()
+ assert len(large_rescue)<=0xc0000
+ for name,data in (
+  ('LargeLoader',large_loader), ('LargeRescue',large_rescue),
+  ('LargeOldTable',(built/'BootloaderLarge/StockTable.bin').read_bytes()),
+  ('LargeNewTable',(built/'BootloaderLarge/RescueTable.bin').read_bytes().ljust(4096,b'\xff')),
+ ):
+  write_bytes_if_changed(out/(name+'.bin'), data)
 else:
  generator=Path(os.environ['TAKEOVER_IDF_PATH'])/'components/partition_table/gen_esp32part.py'
  generate_output_if_changed([sys.executable,str(generator),'--offset','0x8000',str(root/target/'partitions.csv'),str(out/'ExpectedTable.bin')], padding=4096)
@@ -38,6 +53,18 @@ else:
 header='#pragma once\n#define TAKEOVER_RESCUE_SIZE '+str(len(rescue))+'u\n'
 for name,data in [('Loader',loader),('Rescue',rescue)]:
  header+='static const unsigned char Takeover'+name+'Hash[32] = {'+','.join(str(v) for v in hashlib.sha256(data).digest())+'};\n'
+if target=='ShellyTakeover':
+ header+=f'#define TAKEOVER_LARGE_RESCUE_SIZE {len(large_rescue)}u\n'
+ for name,data in [('LargeLoader',large_loader),('LargeRescue',large_rescue)]:
+  header+='static const unsigned char Takeover'+name+'Hash[32] = {'+','.join(str(v) for v in hashlib.sha256(data).digest())+'};\n'
+ for prefix in ('','Large'):
+  for table,label in [('OldTable',b'app_1'),('NewTable',b'safeboot')]:
+   data=(out/(prefix+table+'.bin')).read_bytes()
+   offset,size=next((offset,size) for magic,_,_,offset,size,name,_ in
+    struct.iter_unpack('<HBBII16sI',data) if magic==0x50aa and name.rstrip(b'\0')==label)
+   slot='APP' if table=='OldTable' else 'RESCUE'
+   macro='TAKEOVER_'+('LARGE_' if prefix else '')+slot
+   header+=f'#define {macro}_OFFSET {offset:#x}u\n#define {macro}_SPAN {size:#x}u\n'
 if target=='NousTakeover':
  original=bytes.fromhex(identity['bootloader']['span_sha256']);assert len(original)==32
  header+='static const unsigned char TakeoverOriginalLoaderHash[32] = {'+','.join(str(v) for v in original)+'};\n'

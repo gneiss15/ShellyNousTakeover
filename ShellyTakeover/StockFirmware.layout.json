@@ -2,19 +2,19 @@
   "name": "PlugMG3",
   "model": "S3PL-30110EU",
   "platform": "esp32c3",
-  "version": "2.0.1",
-  "build_id": "20260923-075548/2.0.1-ge1a198b",
-  "package_sha256": "308731335996c584762969681b14d2c6dc6c917dada6cf25cc6aa1a595b50391",
+  "version": "2.2.0",
+  "build_id": "20261109-150320/2.2.0-g7968dca",
+  "package_sha256": "55c409778bb71fbdba49ec49a5e3eaa7a1f6562777edeba6f7dbd02648b2742a",
   "bootloader": {
     "offset": 0,
-    "size": 20384,
-    "sha256": "7abe224c058701ec3817c430f012142f1c1b72545c148c94fd8116611ba7c49e",
+    "size": 20272,
+    "sha256": "c4faf5d46de22ceb11f6e85c9b142f3999316c34670894ba68e77bd00c7e8e8a",
     "encrypt": true
   },
   "partition_table": {
     "offset": 65536,
     "size": 4096,
-    "sha256": "7f229151f235785a9169b47c2e6884d5c49d584b626b18b31cdf5e1c21a85bc2",
+    "sha256": "e5bdb5e4268dd3b656f16be686dc33aa459119932d8fe3a5e89c5f302e826eb0",
     "encrypt": true
   },
   "partitions": [
@@ -39,14 +39,14 @@
       "type": 0,
       "subtype": 16,
       "offset": 131072,
-      "size": 2752512,
+      "size": 3145728,
       "flags": 1
     },
     {
       "label": "fs_0",
       "type": 1,
       "subtype": 130,
-      "offset": 2883584,
+      "offset": 3276800,
       "size": 917504,
       "flags": 1
     },
@@ -54,15 +54,15 @@
       "label": "app_1",
       "type": 0,
       "subtype": 17,
-      "offset": 3801088,
-      "size": 2752512,
+      "offset": 4194304,
+      "size": 3145728,
       "flags": 1
     },
     {
       "label": "fs_1",
       "type": 1,
       "subtype": 130,
-      "offset": 6553600,
+      "offset": 7340032,
       "size": 917504,
       "flags": 1
     },
@@ -86,19 +86,19 @@
   "parts": {
     "otadata": {
       "size": 8192,
-      "sha256": "442633e9a6c77556e479f0b8fde4c188d5a0a38d846aec2c7b8ce2549a0442a4",
+      "sha256": "554e8682547e4f376ee5dd05b31e04f1b6f72559dd20ab5ef5b88eb4aa46486d",
       "encrypt": true
     },
     "app": {
       "partition": "app_0",
-      "size": 2712352,
-      "sha256": "82f71b5db76025617ef0f12966dfcd9b0c7af765adf9a114615dd32b41efaeef",
+      "size": 2847776,
+      "sha256": "ec7102746ff81fd2c0637ade16c0818bb8b0a68d6141cb0710a2677025e4d176",
       "encrypt": true
     },
     "fs": {
       "partition": "fs_0",
       "size": 917504,
-      "sha256": "c5d30969f21ea9c5d4c873ef5b6d2caf4d598c32114ca6239745cb34b05b89ea",
+      "sha256": "2eed9b9846de8bae5a872083b0b0baf0dbc513921940b82355166015b001c310",
       "encrypt": true
     }
   }

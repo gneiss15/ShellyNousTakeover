@@ -5,10 +5,12 @@
 #include "BootState.h"
 #include "PayloadIdentity.h"
 #include "esp_flash.h"
+#include "esp_flash_internal.h"
 #include "esp_chip_info.h"
 #include "esp_secure_boot.h"
 #include "esp_flash_encrypt.h"
 #include "esp_ota_ops.h"
+#include "esp_image_format.h"
 #include "mbedtls/sha256.h"
 #include <string.h>
 #include <stdio.h>
@@ -18,12 +20,33 @@ extern const uint8_t CandidateLoader[] asm("_binary_CandidateLoader_bin_start");
 extern const uint8_t CandidateLoaderEnd[] asm("_binary_CandidateLoader_bin_end");
 extern const uint8_t RescuePayload[] asm("_binary_Rescue_bin_start");
 extern const uint8_t RescuePayloadEnd[] asm("_binary_Rescue_bin_end");
+extern const uint8_t LargeOldTable[] asm("_binary_LargeOldTable_bin_start");
+extern const uint8_t LargeNewTable[] asm("_binary_LargeNewTable_bin_start");
+extern const uint8_t LargeLoader[] asm("_binary_LargeLoader_bin_start");
+extern const uint8_t LargeLoaderEnd[] asm("_binary_LargeLoader_bin_end");
+extern const uint8_t LargeRescue[] asm("_binary_LargeRescue_bin_start");
+extern const uint8_t LargeRescueEnd[] asm("_binary_LargeRescue_bin_end");
+typedef struct
+ {
+  const uint8_t * Old, * Target, * Loader, * LoaderEnd, * Rescue, * RescueEnd;
+  const uint8_t * LoaderHash, * RescueHash;
+  uint32_t AppOffset, AppSize, RescueOffset, RescueSize, PayloadSize;
+ } TLayout;
+static const TLayout Layouts[] = {
+  {OldTable, NewTable, CandidateLoader, CandidateLoaderEnd, RescuePayload, RescuePayloadEnd,
+   TakeoverLoaderHash, TakeoverRescueHash, TAKEOVER_APP_OFFSET, TAKEOVER_APP_SPAN,
+   TAKEOVER_RESCUE_OFFSET, TAKEOVER_RESCUE_SPAN, TAKEOVER_RESCUE_SIZE},
+  {LargeOldTable, LargeNewTable, LargeLoader, LargeLoaderEnd, LargeRescue, LargeRescueEnd,
+   TakeoverLargeLoaderHash, TakeoverLargeRescueHash, TAKEOVER_LARGE_APP_OFFSET, TAKEOVER_LARGE_APP_SPAN,
+   TAKEOVER_LARGE_RESCUE_OFFSET, TAKEOVER_LARGE_RESCUE_SPAN, TAKEOVER_LARGE_RESCUE_SIZE}
+};
+static const TLayout * Layout;
 static uint8_t OriginalLoader[LOADER_WRITE_SPAN];
 static uint8_t Buffer[4096];
 static uint8_t BootSectors[8192], NewSector[4096];
 static uint8_t PreservedHash[3][32];
 static const uint32_t PreservedOffset[] = {0x6000, 0x13000, 0x7F0000};
-static const uint32_t PreservedSize[] = {0xA000, 0x62D000, 0x10000};
+static uint32_t PreservedSize[] = {0xA000, 0x62D000, 0x10000};
 static bool LoaderChanged, LoaderUncertain, BaselineValid;
 static const char * LastError = "";
 static bool HashFlash(uint32_t Offset, uint32_t Size, uint8_t Hash[32])
@@ -83,35 +106,52 @@ static const char * Guard(void)
   const esp_partition_t * Running=esp_ota_get_running_partition();
   if(esp_flash_get_physical_size(NULL,&Size)!=ESP_OK||Size!=0x800000||Chip.model!=CHIP_ESP32C3||Chip.revision!=4||
     esp_secure_boot_enabled()||esp_flash_encryption_enabled()||!Running||Running->type!=ESP_PARTITION_TYPE_APP||
-    Running->subtype!=ESP_PARTITION_SUBTYPE_APP_OTA_1||Running->address!=0x3A0000||Running->size!=0x2A0000)
+    Running->subtype!=ESP_PARTITION_SUBTYPE_APP_OTA_1)
     return "Unsupported chip/security/flash/running slot";
-  if(CandidateLoaderEnd-CandidateLoader!=LOADER_WRITE_SPAN||RescuePayloadEnd-RescuePayload!=TAKEOVER_RESCUE_SIZE)
-    return "Embedded payload lengths differ";
+  Layout=NULL;
+  for(unsigned I=0;I<sizeof(Layouts)/sizeof(Layouts[0]);I++)
+    if(Matches(0x10000,Layouts[I].Old,4096)) {Layout=&Layouts[I];break;}
+  if(!Layout) return "Unsupported original partition table";
+  if(Running->address!=Layout->AppOffset||Running->size!=Layout->AppSize||
+    Running->address+Running->size>Layout->RescueOffset)
+    return "Running slot differs from known partition table or overlaps migration";
+  const esp_partition_pos_t Stock={.offset=0x20000,.size=Layout->AppSize};
+  esp_image_metadata_t Image={0};
+  if(esp_image_verify(ESP_IMAGE_VERIFY,&Stock,&Image)!=ESP_OK)
+    return "Stock app in app_0 is not a valid ESP image";
   uint8_t Hash[32];
-  if(mbedtls_sha256(RescuePayload,TAKEOVER_RESCUE_SIZE,Hash,0)!=0||memcmp(Hash,TakeoverRescueHash,32)||
-    mbedtls_sha256(CandidateLoader,LOADER_WRITE_SPAN,Hash,0)!=0||memcmp(Hash,TakeoverLoaderHash,32))
-    return "Embedded payload digest differs";
-  if(!Matches(0x10000,OldTable,4096)) return "Unsupported original partition table";
-  if(!DigestMatches(0x20000,2708368,"80ce0363774d9904464e5e11c0b2740e5ba221a0104615a841213a83129e6514") &&
-    !DigestMatches(0x20000,2712352,"82f71b5db76025617ef0f12966dfcd9b0c7af765adf9a114615dd32b41efaeef"))
-    return "Stock app is not a supported 2.0.0/2.0.1 image";
-  if(!LoaderMatches(CandidateLoader) &&
-    (!DigestMatches(0,20992,"8df59da4cb489ce7cb95010966c7ad5ba67c6745cf0b76eac70b9ea4692f9979")||!Erased(20992,LOADER_WRITE_SPAN-20992)))
-    return "Unknown bootloader; no write";
+  if(Layout->LoaderEnd-Layout->Loader!=LOADER_WRITE_SPAN||
+    mbedtls_sha256(Layout->Loader,LOADER_WRITE_SPAN,Hash,0)!=0||memcmp(Hash,Layout->LoaderHash,32))
+    return "Embedded loader integrity check failed";
+  if(!LoaderMatches(Layout->Loader))
+   {
+    const bool Large=Layout==&Layouts[1];
+    const uint32_t BootSize=Large?20272:20992;
+    const char * BootHash=Large?"c4faf5d46de22ceb11f6e85c9b142f3999316c34670894ba68e77bd00c7e8e8a":
+      "8df59da4cb489ce7cb95010966c7ad5ba67c6745cf0b76eac70b9ea4692f9979";
+    if(!DigestMatches(0,BootSize,BootHash)||!Erased(BootSize,LOADER_WRITE_SPAN-BootSize))
+      return "Unknown bootloader; no write";
+   }
   unsigned Target;
   if(esp_flash_read(NULL,BootSectors,0x11000,sizeof(BootSectors))!=ESP_OK||!PrepareStockBootState(BootSectors,NewSector,&Target))
     return "SH0S does not permit verified Stock recovery";
-  if(MigrationCheckpointPresent()||!Erased(0x640000,0x1B0000)) return "Not a fresh supported migration; high area is not erased";
+  if(MigrationCheckpointPresent()) return "Existing or unreadable migration checkpoint";
+  MigrationSetRescueRegion(Layout->RescueOffset,Layout->RescueSize);
+  PreservedSize[1]=Layout->RescueOffset-PreservedOffset[1];
   if(esp_flash_read(NULL,OriginalLoader,0,sizeof(OriginalLoader))!=ESP_OK) return "Cannot retain original loader";
   for(unsigned I=0;I<3;I++)
     if(!HashFlash(PreservedOffset[I],PreservedSize[I],PreservedHash[I])) return "Cannot seal preserved ranges";
   BaselineValid=true;
+  if(Layout->RescueEnd-Layout->Rescue!=Layout->PayloadSize||Layout->PayloadSize>Layout->RescueSize)
+    return "Embedded Rescue length differs";
+  if(mbedtls_sha256(Layout->Rescue,Layout->PayloadSize,Hash,0)!=0||memcmp(Hash,Layout->RescueHash,32))
+    return "Embedded Rescue digest differs";
   return NULL;
  }
 static bool InstallLoader(void)
  {
-  if(LoaderMatches(CandidateLoader)) return Preserved();
-  TLoaderWriteResult Result=WriteBoundedLoader(OriginalLoader,CandidateLoader,false);
+  if(LoaderMatches(Layout->Loader)) return Preserved();
+  TLoaderWriteResult Result=WriteBoundedLoader(OriginalLoader,Layout->Loader,false);
   LoaderUncertain=Result.DoNotRestart;
   LoaderChanged=Result.TargetVerified;
   if(!Result.TargetVerified||!Preserved())
@@ -124,10 +164,10 @@ static bool InstallLoader(void)
  }
 static bool Stage(void)
  {
-  return MigrationStage(RescuePayload,TAKEOVER_RESCUE_SIZE,OldTable,NewTable,CandidateLoader);
+  return MigrationStage(Layout->Rescue,Layout->PayloadSize,Layout->Old,Layout->Target,Layout->Loader);
  }
-static bool Commit(void) { return MigrationCommit(NewTable); }
-static bool Ready(void) { return !LoaderUncertain&&LoaderMatches(CandidateLoader)&&Preserved()&&MigrationRestartReady(NewTable); }
+static bool Commit(void) { return MigrationCommit(Layout->Target); }
+static bool Ready(void) { return !LoaderUncertain&&LoaderMatches(Layout->Loader)&&Preserved()&&MigrationRestartReady(Layout->Target); }
 static bool Uncertain(void) { return LoaderUncertain||MigrationUncertain(); }
 static const char * Error(void) { return LastError[0]?LastError:MigrationError(); }
 static bool Rollback(void)
@@ -135,13 +175,13 @@ static bool Rollback(void)
   if(Uncertain()||!Preserved()) return false;
   if(MigrationCheckpointPresent())
    {
-    if(Matches(0x10000,NewTable,4096)&&!MigrationRollback(NewTable)) return false;
-    if(!Matches(0x10000,OldTable,4096)||!MigrationReleaseCheckpoint(NewTable)) return false;
+    if(Matches(0x10000,Layout->Target,4096)&&!MigrationRollback(Layout->Target)) return false;
+    if(!Matches(0x10000,Layout->Old,4096)||!MigrationReleaseCheckpoint(Layout->Target)) return false;
    }
-  if(!Matches(0x10000,OldTable,4096)||!Matches(0x11000,BootSectors,8192)) return false;
+  if(!Matches(0x10000,Layout->Old,4096)||!Matches(0x11000,BootSectors,8192)) return false;
   if(LoaderChanged)
    {
-    TLoaderWriteResult Result=WriteBoundedLoader(CandidateLoader,OriginalLoader,false);
+    TLoaderWriteResult Result=WriteBoundedLoader(Layout->Loader,OriginalLoader,false);
     LoaderUncertain=Result.DoNotRestart;
     if(!Result.TargetVerified||LoaderUncertain) return false;
    }
@@ -149,3 +189,23 @@ static bool Rollback(void)
  }
 static const TTakeoverOps Ops={Guard,InstallLoader,Stage,Commit,Ready,Uncertain,Rollback,Error,NULL,false};
 const TTakeoverOps * ShellyTakeoverOperations(void) { return &Ops; }
+
+bool ShellyReturnToStock(void)
+ {
+  unsigned Target;
+  if(!BaselineValid||Uncertain()||!Preserved()||!LoaderMatches(OriginalLoader)||
+    !Matches(0x10000,Layout->Old,4096)||!Matches(0x11000,BootSectors,sizeof(BootSectors))||
+    !PrepareStockBootState(BootSectors,NewSector,&Target))
+    return false;
+  const uint32_t Address=0x11000+Target*BOOT_STATE_SECTOR_SIZE;
+  const uint32_t Winner=1-Target;
+  bool Written=false;
+  if(esp_flash_set_dangerous_write_protection(esp_flash_default_chip,false)==ESP_OK)
+    Written=esp_flash_erase_region(NULL,Address,BOOT_STATE_SECTOR_SIZE)==ESP_OK&&
+      esp_flash_write(NULL,NewSector,Address,BOOT_STATE_SECTOR_SIZE)==ESP_OK;
+  const bool ProtectedAgain=esp_flash_set_dangerous_write_protection(esp_flash_default_chip,true)==ESP_OK;
+  return Written&&ProtectedAgain&&Matches(Address,NewSector,BOOT_STATE_SECTOR_SIZE)&&
+    Matches(0x11000+Winner*BOOT_STATE_SECTOR_SIZE,
+      BootSectors+Winner*BOOT_STATE_SECTOR_SIZE,BOOT_STATE_SECTOR_SIZE)&&
+    Matches(0x10000,Layout->Old,4096)&&Preserved()&&LoaderMatches(OriginalLoader);
+ }

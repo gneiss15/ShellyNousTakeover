@@ -3,9 +3,9 @@
   "model": "S3PL-30110EU",
   "app": "PlugMG3",
   "target": {
-    "version": "2.0.1",
-    "build_id": "20260923-075548/2.0.1-ge1a198b",
-    "url": "https://fwcdn.shelly.cloud/gen2-ntest/PlugMG3/308731335996c584762969681b14d2c6dc6c917dada6cf25cc6aa1a595b50391"
+    "version": "2.2.0",
+    "build_id": "20261109-150320/2.2.0-g7968dca",
+    "url": "https://fwcdn.shelly.cloud/gen2-ntest/PlugMG3/55c409778bb71fbdba49ec49a5e3eaa7a1f6562777edeba6f7dbd02648b2742a"
   },
   "allowed_sources": [
     {
@@ -14,11 +14,19 @@
     }
   ],
   "downgrade_supported": false,
-  "scope": "Exact 2.0.0 and 2.0.1 stock identities; pinned factory update to 2.0.1, package/host checked, new device path not hardware tested",
+  "scope": "Pinned factory update to 2.2.0. Takeover accepts the listed stock identities in slot 0. Hardware verification of the 2.2.0 path is pending.",
   "accepted_stock": [
     {
       "version": "2.0.0",
       "build_id": "20260710-101147/2.0.0-g87fbfa4"
+    },
+    {
+      "version": "2.0.1",
+      "build_id": "20260923-075548/2.0.1-ge1a198b"
+    },
+    {
+      "version": "2.1.0",
+      "build_id": "20261014-085737/2.1.0-g422283d"
     }
   ]
 }

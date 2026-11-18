@@ -20,7 +20,16 @@ static bool Uncertain;
 static const char * Error = "";
 static const char * Step = "NotStaged";
 static const uint32_t ProtectedOffsets[3] = { 0, 0x13000, MIG_FACTORY_OFFSET };
-static const uint32_t ProtectedSizes[3] = { 0x10000, MIG_RESCUE_OFFSET - 0x13000, MIG_FLASH_SIZE - MIG_FACTORY_OFFSET };
+static uint32_t ProtectedSizes[3] = { 0x10000, MIG_RESCUE_OFFSET - 0x13000, MIG_FLASH_SIZE - MIG_FACTORY_OFFSET };
+static uint32_t RescueOffset = MIG_RESCUE_OFFSET;
+static uint32_t RescueSize = MIG_RESCUE_SIZE;
+
+void MigrationSetRescueRegion(uint32_t Offset, uint32_t Size)
+ {
+  RescueOffset = Offset;
+  RescueSize = Size;
+  ProtectedSizes[1] = Offset - ProtectedOffsets[1];
+ }
 
 const char * MigrationError(void) { return Error; }
 const char * MigrationStep(void) { return Step; }
@@ -77,7 +86,7 @@ static bool Valid(TCheckpoint * C, const uint8_t * NewTable)
   memcpy(Expected, C->SelfHash, 32); memset(C->SelfHash, 0, 32);
   const bool Ok = HashMemory(C, sizeof(*C), Hash) && !memcmp(Hash, Expected, 32);
   memcpy(C->SelfHash, Expected, 32);
-  return Ok && C->Magic == 0x534D4731 && C->FlashSize == MIG_FLASH_SIZE && C->RescueSize && C->RescueSize <= MIG_RESCUE_SIZE &&
+  return Ok && C->Magic == 0x534D4731 && C->FlashSize == MIG_FLASH_SIZE && C->RescueSize && C->RescueSize <= RescueSize &&
     HashMemory(NewTable, 4096, Hash) && !memcmp(Hash, C->TargetHash, 32);
  }
 static bool Load(const uint8_t * NewTable)
@@ -104,8 +113,8 @@ static bool Protected(void)
 static bool Staged(void)
  {
   uint8_t Hash[32];
-  return HashFlash(MIG_RESCUE_OFFSET, Saved.RescueSize, Hash) && !memcmp(Hash, Saved.RescueHash, 32) &&
-    Erased(MIG_RESCUE_OFFSET + Saved.RescueSize, MIG_RESCUE_SIZE - Saved.RescueSize) &&
+  return HashFlash(RescueOffset, Saved.RescueSize, Hash) && !memcmp(Hash, Saved.RescueHash, 32) &&
+    Erased(RescueOffset + Saved.RescueSize, RescueSize - Saved.RescueSize) &&
     Erased(MIG_NVS_OFFSET, MIG_NVS_SIZE) && Erased(MIG_OTA_OFFSET, 8192);
  }
 static bool BeginWrite(void)
@@ -140,7 +149,7 @@ bool MigrationStage(const uint8_t * Rescue, uint32_t Size, const uint8_t * OldTa
  {
   Error = "";
   uint32_t FlashSize = 0;
-  if( Uncertain || !Size || Size > MIG_RESCUE_SIZE || esp_flash_get_size(NULL, &FlashSize) != ESP_OK || FlashSize != MIG_FLASH_SIZE ||
+  if( Uncertain || !Size || Size > RescueSize || esp_flash_get_size(NULL, &FlashSize) != ESP_OK || FlashSize != MIG_FLASH_SIZE ||
       !Matches(0, Loader, 0x6000) || !Matches(0x10000, OldTable, 4096) )
     return Fail("Staging hardware, loader or original-table guard failed");
   if( MigrationCheckpointPresent() )
@@ -164,7 +173,7 @@ bool MigrationStage(const uint8_t * Rescue, uint32_t Size, const uint8_t * OldTa
   if( !Protected() || !Matches(0x11000, Saved.State, 8192) || !BeginWrite() ) return false;
   bool Ok = Replace(MIG_CHECKPOINT_OFFSET, MIG_CHECKPOINT_SIZE, &Saved, sizeof(Saved)) &&
     Replace(MIG_CHECKPOINT_OFFSET + MIG_CHECKPOINT_SIZE, MIG_CHECKPOINT_SIZE, &Saved, sizeof(Saved));
-  if( Ok ) { Step = "BaselineCopiesVerified"; Ok = Replace(MIG_RESCUE_OFFSET, MIG_RESCUE_SIZE, Rescue, Size); }
+  if( Ok ) { Step = "BaselineCopiesVerified"; Ok = Replace(RescueOffset, RescueSize, Rescue, Size); }
   if( Ok ) { Step = "RescueReadbackVerified"; Ok = Replace(MIG_NVS_OFFSET, MIG_NVS_SIZE, NULL, 0) && Replace(MIG_OTA_OFFSET, 8192, NULL, 0); }
   Ok = Ok && Staged() && Protected() && Matches(0x10000, Saved.Table, 4096) && Matches(0x11000, Saved.State, 8192);
   if( !EndWrite(Ok) ) return false;
@@ -194,7 +203,7 @@ bool MigrationRollbackReady(const uint8_t * NewTable)
  {
   uint8_t Hash[32];
   if( Uncertain || !Load(NewTable) || !Matches(0x10000, NewTable, 4096) || !Protected() ||
-      !Matches(0x11000, Saved.State, 8192) || !HashFlash(MIG_RESCUE_OFFSET, Saved.RescueSize, Hash) || memcmp(Hash, Saved.RescueHash, 32) )
+      !Matches(0x11000, Saved.State, 8192) || !HashFlash(RescueOffset, Saved.RescueSize, Hash) || memcmp(Hash, Saved.RescueHash, 32) )
     return Fail("Rollback requires intact original apps/data, unchanged read-only SH0S and Rescue");
   return true;
  }

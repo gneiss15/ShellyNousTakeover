@@ -3,7 +3,9 @@
 """Exercise actual Shelly PC orchestration and one-file HTTP server without hardware."""
 import json
 import os
+import socket
 import sys
+import threading
 from pathlib import Path
 import tempfile
 import unittest
@@ -76,8 +78,21 @@ class Test(unittest.TestCase):
             with self.assertRaises(pc.TakeoverError):rescue_verified(s,'020000000001','shelly')
             s['DeviceType']='CustomShellyV1';self.assertTrue(rescue_verified(s,'020000000001','shelly'))
         s['DeviceType']='TmrSwShellyC3V1'
+        s.update(RunningOffset=0x700000,BootOffset=0x700000)
+        self.assertTrue(rescue_verified(s,'020000000001','shelly'))
         s['BootOffset']=0x10000
         with self.assertRaises(pc.TakeoverError):rescue_verified(s,'020000000001','shelly')
+    def test_udp_failure(self):
+        status={'Application':'ShellyTakeover','Phase':'Failed','Mac':'020000000001',
+                'Error':'Layout rejected','DoNotRestart':False}
+        received=threading.Event()
+        with patch.object(pc,'print',create=True,side_effect=lambda *args,**kwargs:received.set()) as output:
+            with pc.listen_for_failure('127.0.0.1','020000000001'):
+                with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sender:
+                    sender.sendto(json.dumps(status).encode(),('127.0.0.1',45678))
+                self.assertTrue(received.wait(2))
+        output.assert_called_once()
+        self.assertIn('Layout rejected',output.call_args.args[0])
     def test_stock_before_takeover(self):
         source=pc.StockFirmware.policy()['allowed_sources'][0]
         for outcome in ['ok','failed','wrong_mac','still_old']:

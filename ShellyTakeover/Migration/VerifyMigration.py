@@ -37,6 +37,11 @@ static unsigned char Old[4096],Target[4096],Loader[0x6000],Rescue[0x13000];
 void *esp_flash_default_chip;
 static int Calls,FailAt,Failures,MutationCalls;
 static bool ProtectedFlag=true;
+#ifdef VERIFY_LARGE
+#define EXPECTED_RESCUE_OFFSET 0x700000
+#else
+#define EXPECTED_RESCUE_OFFSET MIG_RESCUE_OFFSET
+#endif
 static bool readonly(uint32_t o,uint32_t n){if(memcmp(Flash+0x10000,Target,4096))return false;return (o<0x13000&&o+n>0x11000)||(o<0x80000&&o+n>0x14000)||(o+n>MIG_FACTORY_OFFSET);}
 static int fault(void){Calls++;if(Calls==FailAt){Failures++;return 1;}return 0;}
 int esp_flash_get_size(void*c,uint32_t*s){(void)c;*s=sizeof(Flash);return fault();}
@@ -48,11 +53,15 @@ static void reset(void){
  memset(Flash,255,sizeof(Flash));for(unsigned i=0;i<sizeof(Loader);i++)Loader[i]=(i*31)%251;
  memset(Old,0xA1,sizeof(Old));memset(Target,0xB2,sizeof(Target));memset(Rescue,0xC3,sizeof(Rescue));
  memcpy(Flash,Loader,sizeof(Loader));memcpy(Flash+0x10000,Old,4096);memset(Flash+0x11000,0x55,8192);
- for(unsigned i=0x13000;i<MIG_RESCUE_OFFSET;i++)Flash[i]=(i*17)%253;
+ for(unsigned i=0x13000;i<EXPECTED_RESCUE_OFFSET;i++)Flash[i]=(i*17)%253;
+#ifdef VERIFY_LARGE
+ memset(Flash+EXPECTED_RESCUE_OFFSET,0xA3,0xE0000);
+ MigrationSetRescueRegion(EXPECTED_RESCUE_OFFSET,0xC0000);
+#endif
  memset(Flash+MIG_FACTORY_OFFSET,0x78,MIG_FLASH_SIZE-MIG_FACTORY_OFFSET);
  memcpy(Baseline,Flash,sizeof(Flash));memset(&Saved,0,sizeof(Saved));Uncertain=false;Error="";Step="NotStaged";Calls=FailAt=Failures=MutationCalls=0;ProtectedFlag=true;
 }
-static void invariant(void){assert(!memcmp(Flash,Baseline,0x10000));assert(!memcmp(Flash+0x13000,Baseline+0x13000,MIG_RESCUE_OFFSET-0x13000));assert(!memcmp(Flash+MIG_FACTORY_OFFSET,Baseline+MIG_FACTORY_OFFSET,MIG_FLASH_SIZE-MIG_FACTORY_OFFSET));}
+static void invariant(void){assert(!memcmp(Flash,Baseline,0x10000));assert(!memcmp(Flash+0x13000,Baseline+0x13000,EXPECTED_RESCUE_OFFSET-0x13000));assert(!memcmp(Flash+MIG_FACTORY_OFFSET,Baseline+MIG_FACTORY_OFFSET,MIG_FLASH_SIZE-MIG_FACTORY_OFFSET));}
 static void stage(void){assert(MigrationStage(Rescue,sizeof(Rescue),Old,Target,Loader));assert(ProtectedFlag&&!Uncertain);invariant();}
 int main(void){
  reset();assert(!MigrationCommit(Target)&&MutationCalls==0);assert(!MigrationRollback(Target)&&MutationCalls==0);
@@ -68,6 +77,10 @@ int main(void){
  reset();stage();Flash[MIG_OTA_OFFSET]=0;MutationCalls=0;assert(!MigrationCommit(Target)&&MutationCalls==0);
  reset();stage();assert(MigrationCommit(Target));Flash[0x11000]^=1;MutationCalls=0;assert(!MigrationRollback(Target)&&MutationCalls==0);
  reset();stage();assert(MigrationCommit(Target));Flash[MIG_MAIN_OFFSET]^=1;MutationCalls=0;assert(!MigrationRollback(Target)&&MutationCalls==0);
+#ifdef VERIFY_LARGE
+ puts("Large-layout migration and rollback passed with populated fs_1");
+ return 0;
+#endif
  reset();stage();int StageCalls=Calls;
  // Every API failure position in actual staging, including partial writes.
  for(int f=1;f<=StageCalls;f++){reset();FailAt=f;bool ok=MigrationStage(Rescue,sizeof(Rescue),Old,Target,Loader);assert(!ok);invariant();if(Uncertain){MutationCalls=0;assert(!MigrationCommit(Target)&&MutationCalls==0);}}
@@ -78,6 +91,9 @@ int main(void){
  printf("Actual migration writer: %d stage, %d commit, %d rollback API fault positions; real SHA256/invariants/metadata locks passed\n",StageCalls,CommitCalls,RollbackCalls);return 0;}
 '''
     (p/'test.c').write_text(harness)
-    defines = [] if '--shelly-geometry' in sys.argv else ['-DMIGRATION_NODE_TEST']
+    if '--shelly-large' in sys.argv:
+        defines = ['-DVERIFY_LARGE']
+    else:
+        defines = [] if '--shelly-geometry' in sys.argv else ['-DMIGRATION_NODE_TEST']
     subprocess.run(['cc','-std=c11','-O2','-Wall','-Wextra','-Werror','-Wno-deprecated-declarations'] + defines + ['-I',str(p),'-I',str(root),str(p/'test.c'),'-lcrypto','-o',str(p/'test')],check=True)
     subprocess.run([str(p/'test')],check=True)

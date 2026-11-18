@@ -14,14 +14,7 @@
 #include "BootState.h"
 #include "StockRequest.h"
 
-#ifndef DUAL_LAYOUT_NODE_TEST
-#define APP0_SIZE 0x2A0000
-#define APP1_OFFSET 0x3A0000
-#define APP1_SIZE 0x2A0000
-#define RESCUE_OFFSET 0x640000
-#define RESCUE_SIZE 0x180000
-#define OTA_OFFSET 0x7E0000
-#else
+#ifdef DUAL_LAYOUT_NODE_TEST
 #define APP0_SIZE 0x100000
 #define APP1_OFFSET 0x130000
 #define APP1_SIZE 0x100000
@@ -31,7 +24,24 @@
 #endif
 #include "Layout.h"
 
+#ifndef STOCK_TABLE_COPIES
+#define STOCK_TABLE_COPIES 1
+#endif
 static uint8_t BootSectors[2 * BOOT_STATE_SECTOR_SIZE] __attribute__((aligned(4)));
+
+static bool MatchesTable(const uint8_t * Expected, unsigned Length, unsigned Copies)
+ {
+  const unsigned Span = 4096 / Copies;
+  for( unsigned Offset = 0; Offset < 4096; Offset += Span )
+   {
+    if( Length > Span || memcmp(BootSectors + Offset, Expected, Length) != 0 )
+      return false;
+    for( unsigned Index = Length; Index < Span; ++Index )
+      if( BootSectors[Offset + Index] != 0xFF )
+        return false;
+   }
+  return true;
+ }
 
 void __attribute__((noreturn)) call_start_cpu0(void)
  {
@@ -52,10 +62,8 @@ void __attribute__((noreturn)) call_start_cpu0(void)
     bootloader_reset();
   const unsigned char * Expected = Layout == LayoutStock ? StockTable : RescueTable;
   const unsigned Length = Layout == LayoutStock ? sizeof(StockTable) : sizeof(RescueTable);
-  bool TableMatches = memcmp(BootSectors, Expected, Length) == 0;
-  for( unsigned Index = Length; Index < 4096 && TableMatches; ++Index )
-    if( BootSectors[Index] != 0xFF ) TableMatches = false;
-  if( !TableMatches ) bootloader_reset();
+  if( !MatchesTable(Expected, Length, Layout == LayoutStock ? STOCK_TABLE_COPIES : 1) )
+    bootloader_reset();
   // GPIO input with pull-up; LOW must persist for one second.
   const bool KeyPressed = bootloader_common_check_long_hold_gpio(7, 1) == GPIO_LONG_HOLD;
   if( Layout == LayoutRescue )

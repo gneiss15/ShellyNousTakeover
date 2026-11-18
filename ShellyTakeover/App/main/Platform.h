@@ -2,3 +2,4 @@
 #pragma once
 #include "Flow.h"
 const TTakeoverOps * ShellyTakeoverOperations(void);
+bool ShellyReturnToStock(void);

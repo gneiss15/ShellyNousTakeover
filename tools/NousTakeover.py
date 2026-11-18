@@ -82,14 +82,15 @@ def preflight(http):
 
 def rescue_verified(status,expected_mac,target='nous'):
     if not isinstance(status,dict) or status.get('Application')!='Rescue':return False
-    project,offset={'nous':('NousTakeover',0x10000),'shelly':('ShellyTakeover',0x640000)}[target]
+    project,offsets={'nous':('NousTakeover',(0x10000,)),'shelly':('ShellyTakeover',(0x640000,0x700000))}[target]
     device_type=os.environ.get('TAKEOVER_DEVICE_TYPE',(ROOT/project/'DeviceType.txt').read_text().strip())
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9]{0,30}',device_type):raise TakeoverError('Invalid TAKEOVER_DEVICE_TYPE')
     version_key='ShellyRescue' if target=='shelly' else 'NousRescue'
     if status.get('Project')!=project or status.get('DeviceType')!=device_type or status.get('Version')!=VERSIONS[version_key]:
         raise TakeoverError('Different Rescue identity/version at target IP')
     if mac(status.get('Mac'))!=expected_mac:raise TakeoverError('Different device MAC after migration')
-    if status.get('GeometryValid') is not True or status.get('RunningOffset')!=offset or status.get('BootOffset')!=offset or status.get('MainReady') is not False:
+    offset=status.get('RunningOffset')
+    if status.get('GeometryValid') is not True or offset not in offsets or status.get('BootOffset')!=offset or status.get('MainReady') is not False:
         raise TakeoverError('Rescue geometry/boot/Main-empty verification failed')
     return True
 
@@ -105,7 +106,22 @@ def wait_rescue(http,expected_mac,timeout=240,clock=time.monotonic,sleep=time.sl
             if status.get('Phase')!=last_phase:
                 last_phase=status.get('Phase');print('Takeover phase:',last_phase,flush=True)
             if last_phase=='Failed':
-                raise TakeoverError('Takeover failed: '+str(status.get('Error',''))+'; RollbackVerified='+str(status.get('RollbackVerified'))+'; DoNotRestart='+str(status.get('DoNotRestart')))
+                error='Takeover failed: '+str(status.get('Error',''))+'; RollbackVerified='+str(status.get('RollbackVerified'))+'; DoNotRestart='+str(status.get('DoNotRestart'))
+                if target=='shelly' and status.get('DoNotRestart') is False:
+                    stock_deadline=min(deadline,clock()+45)
+                    while clock()<stock_deadline:
+                        try:
+                            stock=json.loads(http.request('/shelly',timeout=3))
+                            confirmed=(isinstance(stock,dict) and stock.get('model')=='S3PL-30110EU'
+                                       and stock.get('app')=='PlugMG3' and stock.get('slot')==0
+                                       and mac(stock.get('mac'))==expected_mac)
+                        except (urllib.error.URLError,TimeoutError,OSError,ValueError,TakeoverError):
+                            confirmed=False
+                        if confirmed:
+                            raise TakeoverError(error+'; same device verified back in Stock app_0')
+                        sleep(2)
+                    error+='; Stock return not confirmed'
+                raise TakeoverError(error)
         sleep(2)
     raise TakeoverError('Rescue not verified within deadline; no retry upload or automatic reset. Inspect device diagnosis.')
 

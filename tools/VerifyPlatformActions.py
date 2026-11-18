@@ -15,6 +15,11 @@ prelude=r'''
 #define TAKEOVER_RESCUE_SIZE 100
 #define LOADER_WRITE_SPAN 24576
 static uint8_t OriginalLoader[24576],CandidateLoader[24576],RescuePayload[100],OldTable[4096],NewTable[4096],BootSectors[8192];
+static const struct {
+ const uint8_t *Old, *Target, *Loader, *Rescue;
+ uint32_t PayloadSize;
+} Active = {OldTable,NewTable,CandidateLoader,RescuePayload,100};
+static const __typeof__(Active) *Layout=&Active;
 static bool LoaderChanged,LoaderUncertain,BaselineValid=true;
 static const char * LastError="";
 typedef struct {bool TargetVerified,RollbackVerified,ProtectionRestored,InvariantsVerified,DoNotRestart;} TLoaderWriteResult;

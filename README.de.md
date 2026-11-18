@@ -2,14 +2,16 @@ English version is [here](README.md).
 
 # ShellyNousTakeover
 
-Dokumentversion: 1.28
+Dokumentversion: 1.29
 
 ShellyNousTakeover überführt einen unterstützten Shelly Plug M Gen3 oder Nous A8T
 in ein System mit eigenständiger Rescue App und Hardware-Safe-Boot. Die Takeover enthält
 den finalen Bootloader und die Rescue. Nach erfolgreicher Übernahme kann eine
 passende Haupt-App über die Rescue installiert werden.
 
-**Entwicklungsstand:** Work in progress. Shelly-Übernahme, Rescue-Start und Taster-Safe-Boot sind am unterstützten Gerät geprüft. Der neue eigenständige Nous-Ablauf ist gebaut und hostgeprüft; sein vollständiger Test an einem unveränderten Gerät steht noch aus.
+**Auf Hardware getestet:** Der Tag [hardware-tested-2026-10-21](https://github.com/gneiss15/ShellyNousTakeover/tree/hardware-tested-2026-10-21) verweist auf den bisherigen GitHub-Stand, den der Projektbetreuer mit Shelly und Nous getestet hat.
+
+**Aktueller Stand: noch nicht auf Hardware getestet.** Der Shelly-Build erkennt das ursprüngliche Stock-Layout und das größere Layout von PlugMG3 2.2.0 Stable. Takeover wählt die passende Rescue und den passenden Dual-Bootloader. Jeder Bootloader enthält nur seine eigene Stock- und Zielpartitionstabelle. Die Hardwareprüfung des neuen Layouts und der automatischen Rückkehr zu Stock steht aus.
 
 Produktversionen stehen zentral in `Versions.txt` im Repository-Stamm: Shelly- und Nous-App/Rescue sowie das MiniMain-Beispiel haben jeweils einen eigenen Eintrag. IDF-Projektkennung, Rescue-Status, Paketprüfung und PC-seitige Checks lesen diese Werte. Generierte Artefakte werden nicht direkt bearbeitet und Produktversionen nicht zusätzlich an anderer Stelle eingetragen.
 
@@ -98,9 +100,10 @@ können ihn verhindern. Safe Boot beseitigt nicht das Risiko während der Übern
 - Passende WLAN-Konfiguration und ein eigenes Signierschlüsselpaar außerhalb des Projekts.
 
 Shelly-Ausgangspunkt: Plug M Gen3 / S3PL-30110EU, ESP32-C3 Revision 4, 8 MiB,
-Stock PlugMG3 2.0.0 / 20260710-101147/2.0.0-g87fbfa4 oder
-2.0.1 / 20260923-075548/2.0.1-ge1a198b in app_0. Beide exakten Builds werden
-direkt akzeptiert; bei 2.0.0 ist kein vorheriges Stock-Update erforderlich.
+Stock PlugMG3 in `app_0`. Der PC akzeptiert die in
+[StockUpdatePolicy.json](ShellyTakeover/StockUpdatePolicy.json) aufgeführten
+Builds von 2.0.0, 2.0.1, 2.1.0 und 2.2.0. Takeover prüft vor dem Schreiben die
+tatsächliche Partitionstabelle und den Bootloader.
 Nous-Ausgangspunkt: A8T mit der passenden Tasmota-Partitionstabelle gemäß
 [AppRequirements.md](AppRequirements.de.md).
 
@@ -258,7 +261,7 @@ Sicherheitseinstellung. Für die Takeover muss Stock in Slot 0 laufen. Der bekan
 Factory-Build darf vor seinem vorgeschalteten Stock-Update auch in Slot 1 laufen;
 nach dem Update wird Slot 0 erneut zwingend geprüft. Beim bekannten Factory-Build `1.8.99-plugmg3prod0` /
 `20251209-070625/geeb7eab` bietet er das geprüfte Update auf den exakten Stock-Build
-2.0.1 an. Ohne Schreiboption führt er weder Download noch Update aus. Unbekannte
+2.2.0 an. Ohne Schreiboption führt er weder Download noch Update aus. Unbekannte
 Zwischenstände, andere Builds und Downgrades werden abgewiesen.
 Der Nous-Check verlangt die bekannte Tasmota-Version samt Build aus
 [NousTakeover/README.md](NousTakeover/README.de.md), 4 MiB Flash, aktives A8T-GPIO-Template,
@@ -309,7 +312,7 @@ Zertifikatskette wird der Download abgebrochen. Alternativ ein bereits vorhanden
 offizielles Zielpaket angeben; auch dieses wird vollständig validiert:
 
 ```bash
-python3 tools/ShellyTakeover.py --execute --update-stock --stock-package /path/to/PlugMG3-2.0.1.zip
+python3 tools/ShellyTakeover.py --execute --update-stock --stock-package /path/to/PlugMG3-2.2.0.zip
 ```
 
 Shelly: Das Skript stellt ausschließlich das gebaute OTA-Paket an einem lokalen
@@ -333,7 +336,7 @@ Geräteantworten oder Authentifizierungsdaten aus. Rescue-Status: GET /status, r
 
 ## Migrationsprüfungen und Bootloader
 
-Vor dem Schreiben prüft Takeover Hardware/Security, Original-Bootloader, Partitionstabelle, laufende App und eingebettete Payloads. Die Webdiagnose startet vor diesen Prüfungen und bleibt bei Fehlern erreichbar. Jeder Migrations-Schreibvorgang wird rückgelesen und geprüft; Rücknahme setzt eine bestätigte Ausgangsbasis und einen eindeutigen Schreibzustand voraus. Die originale Firmware prüft der PC vor dem Upload, da die laufende Takeover deren Version nicht aus ihrer eigenen Version ableiten kann.
+Vor dem Schreiben prüft Takeover Hardware/Security, Original-Bootloader, Partitionstabelle, laufende App und eingebettete Payloads. Die Webdiagnose startet vor diesen Prüfungen und meldet Fehler per HTTP und UDP-Broadcast (Port 45678). Nach verifizierter Bootauswahl für Stock-`app_0` startet Takeover neu. In anderen Fehlerfällen bleibt die Diagnose erreichbar. Jeder Migrations-Schreibvorgang wird rückgelesen und geprüft; Rücknahme setzt eine bestätigte Ausgangsbasis und einen eindeutigen Schreibzustand voraus. Die originale Firmware prüft der PC vor dem Upload, da die laufende Takeover deren Version nicht aus ihrer eigenen Version ableiten kann.
 
 Der Shelly-Dual-Bootloader bleibt der finale Bootloader und unterstützt die originale sowie die migrierte Partitionstabelle. Ein späterer Bootloader-Austausch ist nicht erforderlich. Die dokumentierten Build- und Migrationsskripte verwenden; generisches `idf.py flash` kann die benötigte Partitionierung oder Rescue überschreiben. Das Repository baut unabhängig von den älteren Prjs-Projektbäumen.
 

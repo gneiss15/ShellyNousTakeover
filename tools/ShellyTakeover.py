@@ -2,6 +2,7 @@
 # ShellyTakeover.py, Version: 1.04
 """Check stock read-only; explicitly serve one OTA package and verify same-device Rescue."""
 import argparse
+from contextlib import contextmanager
 import http.server
 import ipaddress
 import json
@@ -78,11 +79,57 @@ def pc_address(device_ip):
         # UDP connect selects the interface without sending a datagram.
         route.connect((device_ip,80));return route.getsockname()[0]
 
+@contextmanager
+def listen_for_failure(device_ip, expected_mac):
+    receiver = None
+    try:
+        receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        receiver.bind(('', 45678))
+        receiver.settimeout(0.25)
+    except OSError:
+        if receiver is not None:
+            receiver.close()
+        print('UDP diagnostics unavailable; monitoring HTTP status.', flush=True)
+        yield
+        return
+    with receiver:
+        done = threading.Event()
+
+        def listen():
+            while not done.is_set():
+                try:
+                    data, sender = receiver.recvfrom(1024)
+                except TimeoutError:
+                    continue
+                except OSError:
+                    return
+                if sender[0] != device_ip:
+                    continue
+                try:
+                    status = json.loads(data)
+                    if (not isinstance(status, dict) or status.get('Application') != 'ShellyTakeover'
+                            or status.get('Phase') != 'Failed' or mac(status.get('Mac')) != expected_mac):
+                        continue
+                except (ValueError, UnicodeError, TakeoverError):
+                    continue
+                error = ascii(status.get('Error', ''))[:250]
+                print(f'Takeover failure via UDP: {error}. '
+                      f'Stock restart requested: {status.get("DoNotRestart") is False}', flush=True)
+                return
+
+        thread = threading.Thread(target=listen, daemon=True)
+        thread.start()
+        try:
+            yield
+        finally:
+            done.set()
+            thread.join()
+
 def execute(http,expected_mac,image):
     validate(image)
     ip=http.base.removeprefix('http://')
     if preflight(http)!=expected_mac:raise TakeoverError('Device identity changed; no upload')
-    with FirmwareServer(ip,image) as server:
+    with listen_for_failure(ip, expected_mac), FirmwareServer(ip,image) as server:
         url='http://'+pc_address(ip)+':'+str(server.server.server_address[1])+'/Takeover.zip'
         payload=json.dumps({'id':1,'method':'Shelly.Update','params':{'url':url}},separators=(',',':')).encode()
         print('Serving validated package; requesting Shelly.Update once.',flush=True)

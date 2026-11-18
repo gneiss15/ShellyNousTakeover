@@ -1,11 +1,18 @@
 # VerifyLayouts.py, Version: 1.00
-"""Compile the actual geometry detector for both isolated build variants."""
+"""Compile the actual geometry detector for each build variant."""
 import pathlib
 import subprocess
 import tempfile
 Root = pathlib.Path(__file__).resolve().parent
-for Node in (False, True):
-  Defines = ('#define DUAL_LAYOUT_NODE_TEST\n#define APP0_SIZE 0x100000\n#define APP1_OFFSET 0x130000\n#define APP1_SIZE 0x100000\n#define RESCUE_OFFSET 0x260000\n#define RESCUE_SIZE 0x140000\n#define OTA_OFFSET 0x3C0000\n' if Node else '#define APP0_SIZE 0x2A0000\n#define APP1_OFFSET 0x3A0000\n#define APP1_SIZE 0x2A0000\n#define RESCUE_OFFSET 0x640000\n#define RESCUE_SIZE 0x180000\n#define OTA_OFFSET 0x7E0000\n')
+MacroNames = ('APP0_SIZE', 'APP1_OFFSET', 'APP1_SIZE', 'RESCUE_OFFSET', 'RESCUE_SIZE', 'OTA_OFFSET')
+for Variant, Values in (
+    ('standard', (0x2A0000, 0x3A0000, 0x2A0000, 0x640000, 0x180000, 0x7E0000)),
+    ('large', (0x300000, 0x400000, 0x300000, 0x700000, 0xC0000, 0x7E0000)),
+    ('node', (0x100000, 0x130000, 0x100000, 0x260000, 0x140000, 0x3C0000)),
+):
+  Node = Variant == 'node'
+  Defines = '#define DUAL_LAYOUT_NODE_TEST\n' if Node else ''
+  Defines += ''.join(f'#define {Name} {Value:#x}\n' for Name, Value in zip(MacroNames, Values))
   Source = Defines + '''#include <assert.h>
 #include "Layout.h"
 int main(void) {
@@ -29,4 +36,4 @@ int main(void) {
     Exe = pathlib.Path(Temp)/'test'
     subprocess.run(['cc','-std=c11','-Wall','-I',str(Root/'bootloader_components/main'),str(C),'-o',str(Exe)],check=True)
     subprocess.run([str(Exe)],check=True)
-print('Actual dual-layout detector: stock/rescue and geometry mutations passed for Shelly/node')
+print('Actual dual-layout detector: stock/rescue and geometry mutations passed for both Shelly variants and node')

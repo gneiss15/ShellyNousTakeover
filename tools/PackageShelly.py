@@ -20,7 +20,7 @@ now=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
 manifest={'name':'PlugMG3','platform':'esp32c3','version':'99.0.0',
           'build_id':now.strftime('%Y%m%d-%H%M%S')+'/shelly-takeover-'+versions['ShellyApp'],
           'build_timestamp':now.isoformat().replace('+00:00','Z'),'parts':parts}
-for name in ['CandidateLoader','Rescue','OldTable','NewTable']:
+for name in ['CandidateLoader','Rescue','OldTable','NewTable','LargeLoader','LargeRescue','LargeOldTable','LargeNewTable']:
     assert (out/(name+'.bin')).read_bytes() in image, 'Missing embedded payload: '+name
 config=(out/'sdkconfig').read_text()
 assert 'CONFIG_PARTITION_TABLE_OFFSET=0x10000\n' in config

@@ -20,6 +20,13 @@ def validate(package):
         rescue=(rescue_dir/'Rescue.bin').read_bytes()
         if (rescue_dir/'DeviceType.txt').read_text().strip()!=expected_type or rescue!=(OUT/'Rescue.bin').read_bytes() or rescue not in app:
             raise ValueError('Embedded Rescue differs from selected DeviceType/build; rebuild Takeover before upload')
+        large_dir=ROOT/'generated/ShellyTakeover/RescueLarge'
+        large_rescue=(OUT/'LargeRescue.bin').read_bytes()
+        if (large_dir/'DeviceType.txt').read_text().strip()!=expected_type or large_rescue!=(large_dir/'Rescue.bin').read_bytes() or large_rescue not in app:
+            raise ValueError('Embedded large-layout Rescue differs from selected DeviceType/build')
+        for name in ('CandidateLoader','OldTable','NewTable','LargeLoader','LargeOldTable','LargeNewTable'):
+            if (OUT/(name+'.bin')).read_bytes() not in app:
+                raise ValueError('Missing embedded layout payload '+name)
         if app!=(OUT/'Takeover.bin').read_bytes() or fs!=b'\xff'*0xe0000:
             raise ValueError('Application differs from build or filesystem is not blank')
         if (manifest.get('name'),manifest.get('platform'),manifest.get('version'))!=('PlugMG3','esp32c3','99.0.0'):

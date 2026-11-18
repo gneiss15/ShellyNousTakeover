@@ -10,6 +10,7 @@ extern "C" {
 const char * MigrationError(void);
 const char * MigrationStep(void);
 bool MigrationUncertain(void);
+void MigrationSetRescueRegion(uint32_t Offset, uint32_t Size);
 bool MigrationCheckpointPresent(void);
 bool MigrationStage(const uint8_t * Rescue, uint32_t Size, const uint8_t * OldTable,
   const uint8_t * NewTable, const uint8_t * Loader);
