@@ -100,10 +100,9 @@ können ihn verhindern. Safe Boot beseitigt nicht das Risiko während der Übern
 - Passende WLAN-Konfiguration und ein eigenes Signierschlüsselpaar außerhalb des Projekts.
 
 Shelly-Ausgangspunkt: Plug M Gen3 / S3PL-30110EU, ESP32-C3 Revision 4, 8 MiB,
-Stock PlugMG3 in `app_0`. Der PC akzeptiert die in
-[StockUpdatePolicy.json](ShellyTakeover/StockUpdatePolicy.json) aufgeführten
-Builds von 2.0.0, 2.0.1, 2.1.0 und 2.2.0. Takeover prüft vor dem Schreiben die
-tatsächliche Partitionstabelle und den Bootloader.
+Stock PlugMG3 in `app_0`. Der PC prüft Modell, Sicherheitszustand und aktiven
+Stock-Slot. Takeover prüft vor dem Schreiben die tatsächliche Partitionstabelle
+und den Bootloader.
 Nous-Ausgangspunkt: A8T mit der passenden Tasmota-Partitionstabelle gemäß
 [AppRequirements.md](AppRequirements.de.md).
 
@@ -256,13 +255,9 @@ python3 tools/ShellyTakeover.py
 python3 tools/NousTakeover.py
 ```
 
-Der Shelly-Check verlangt das oben genannte Modell und die unterstützte
-Sicherheitseinstellung. Für die Takeover muss Stock in Slot 0 laufen. Der bekannte
-Factory-Build darf vor seinem vorgeschalteten Stock-Update auch in Slot 1 laufen;
-nach dem Update wird Slot 0 erneut zwingend geprüft. Beim bekannten Factory-Build `1.8.99-plugmg3prod0` /
-`20251209-070625/geeb7eab` bietet er das geprüfte Update auf den exakten Stock-Build
-2.2.0 an. Ohne Schreiboption führt er weder Download noch Update aus. Unbekannte
-Zwischenstände, andere Builds und Downgrades werden abgewiesen.
+Für die direkte Übernahme muss Stock in `app_0` laufen. Der PC akzeptiert jede
+Stock-Version und Build-ID. Ob das Layout passt, prüft die Takeover nach dem Start
+direkt am Gerät. Der Standardaufruf liest nur den Gerätestatus.
 Der Nous-Check verlangt die bekannte Tasmota-Version samt Build aus
 [NousTakeover/README.md](NousTakeover/README.de.md), 4 MiB Flash, aktives A8T-GPIO-Template,
 LAN-Adresse und den SafeBoot-/Datei-Uploadweg. Original-Bootloader und Partitionstabelle
@@ -279,8 +274,8 @@ python3 tools/ShellyTakeover.py --execute
 python3 tools/NousTakeover.py --execute
 ```
 
-Falls das bekannte Factory-Update benötigt wird, stattdessen nach denselben
-Voraussetzungen und derselben Gerätefreigabe verwenden:
+Der bekannte Factory-Build (`1.8.99-plugmg3prod0` / `20251209-070625/geeb7eab`)
+kann optional vor der Übernahme auf das verifizierte Stock-Paket 2.2.0 aktualisiert werden:
 
 ```bash
 python3 tools/ShellyTakeover.py --execute --update-stock

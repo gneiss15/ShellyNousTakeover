@@ -14,7 +14,7 @@
     }
   ],
   "downgrade_supported": false,
-  "scope": "Pinned factory update to 2.2.0. Takeover accepts the listed stock identities in slot 0. Hardware verification of the 2.2.0 path is pending.",
+  "scope": "Optional pinned factory update to 2.2.0. These identities apply to the update workflow only. Hardware verification of the 2.2.0 path is pending.",
   "accepted_stock": [
     {
       "version": "2.0.0",

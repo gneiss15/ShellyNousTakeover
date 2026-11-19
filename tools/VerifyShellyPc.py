@@ -38,7 +38,12 @@ class Test(unittest.TestCase):
         h=Http();self.assertEqual(pc.preflight(h),'020000000001');self.assertEqual(h.writes,0)
         target=pc.StockFirmware.policy()['target'];h.public.update(ver=target['version'],fw_id=target['build_id'])
         self.assertEqual(pc.preflight(h),'020000000001');self.assertEqual(h.writes,0)
-        for field,value in [('model','Other'),('ver','1.0'),('fw_id','other'),('slot',1),('enhanced_security',True),('mac','020000000002')]:
+        h.public.update(ver='future',fw_id='unlisted')
+        with patch.object(pc.StockFirmware,'classify',side_effect=AssertionError('Stock policy consulted')):
+            self.assertEqual(pc.preflight(h),'020000000001')
+            del h.public['ver'], h.public['fw_id']
+            self.assertEqual(pc.preflight(h),'020000000001')
+        for field,value in [('model','Other'),('slot',1),('enhanced_security',True),('mac','020000000002')]:
             h=Http();h.public[field]=value
             with self.assertRaises(pc.TakeoverError):pc.preflight(h)
             self.assertEqual(h.writes,0)
@@ -52,7 +57,7 @@ class Test(unittest.TestCase):
     def test_factory_slot_one_only_before_update(self):
         h=Http();source=pc.StockFirmware.policy()['allowed_sources'][0]
         h.public.update(ver=source['version'],fw_id=source['build_id'],slot=1)
-        self.assertEqual(pc.stock_state(h)[1],'020000000001')
+        self.assertEqual(pc.stock_state(h,allow_slot_one=True)[1],'020000000001')
         with self.assertRaises(pc.TakeoverError):pc.preflight(h)
         h.public['slot']=2
         with self.assertRaises(pc.TakeoverError):pc.stock_state(h)
@@ -62,6 +67,7 @@ class Test(unittest.TestCase):
     def test_update_once(self):
         for lost in [False,True]:
             h=Http();h.lost=lost
+            h.public.update(ver='future',fw_id='unlisted')
             with patch.object(pc,'validate'),patch.object(pc,'FirmwareServer',FakeServer),patch.object(pc,'pc_address',return_value='192.0.2.20'),patch.object(pc,'wait_rescue') as monitor:
                 pc.execute(h,'020000000001',Path('unused'));monitor.assert_called_once_with(h,'020000000001',target='shelly')
             self.assertEqual(h.writes,1)
@@ -96,20 +102,19 @@ class Test(unittest.TestCase):
     def test_stock_before_takeover(self):
         source=pc.StockFirmware.policy()['allowed_sources'][0]
         for outcome in ['ok','failed','wrong_mac','still_old']:
-            h=Http();h.public.update(ver=source['version'],fw_id=source['build_id'])
+            h=Http();h.public.update(ver=source['version'],fw_id=source['build_id'],slot=1)
             def update(*args):
                 if outcome=='failed':raise pc.TakeoverError('stock update failed')
                 if outcome!='still_old':
-                    target=pc.StockFirmware.policy()['target'];h.public.update(ver=target['version'],fw_id=target['build_id'])
+                    target=pc.StockFirmware.policy()['target'];h.public.update(ver=target['version'],fw_id=target['build_id'],slot=0)
                 if outcome=='wrong_mac':h.public['mac']=h.info['mac']='020000000002'
             with patch.dict(os.environ,{'SHELLY_IP':'192.0.2.10'}),patch.object(sys,'argv',['ShellyTakeover.py','--execute','--update-stock']),patch.object(pc,'ShellyHttp',return_value=h),patch.object(pc,'validate'),patch.object(pc.StockFirmware,'prepare',return_value=Path('stock.zip')),patch.object(pc.StockFirmware,'update',side_effect=update),patch.object(pc,'execute') as takeover:
                 if outcome=='ok':pc.main();takeover.assert_called_once()
                 else:
                     with self.assertRaises(pc.TakeoverError):pc.main()
                     takeover.assert_not_called()
-    def test_stock_offer_is_read_only(self):
-        h=Http();source=pc.StockFirmware.policy()['allowed_sources'][0]
-        h.public.update(ver=source['version'],fw_id=source['build_id'])
+    def test_unlisted_stock_default_is_read_only(self):
+        h=Http();h.public.update(ver='future',fw_id='unlisted')
         with patch.dict(os.environ,{'SHELLY_IP':'192.0.2.10'}),patch.object(sys,'argv',['ShellyTakeover.py']),patch.object(pc,'ShellyHttp',return_value=h),patch.object(pc.StockFirmware,'prepare') as download,patch.object(pc.StockFirmware,'update') as update,patch.object(pc,'execute') as takeover:
             pc.main();download.assert_not_called();update.assert_not_called();takeover.assert_not_called()
         self.assertEqual(h.writes,0)

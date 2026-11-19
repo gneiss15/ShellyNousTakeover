@@ -28,29 +28,24 @@ class ShellyHttp(Http):
             passwords.add_password(None,self.base,os.environ.get('SHELLY_USER','admin'),os.environ['SHELLY_PASSWORD'])
         self.opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect(),urllib.request.HTTPDigestAuthHandler(passwords))
 
-def stock_state(http):
+def stock_state(http, *, allow_slot_one=False):
     public=json.loads(http.request('/shelly'))
     info=json.loads(http.request('/rpc/Shelly.GetDeviceInfo?ident=true'))
     if public.get('model')!='S3PL-30110EU' or public.get('app')!='PlugMG3' or info.get('model')!='S3PL-30110EU' or info.get('app')!='PlugMG3' or info.get('gen')!=3:
         raise TakeoverError('Unsupported Shelly model/generation; no upload')
-    state=StockFirmware.classify(public)
-    # Factory app_1 may update into app_0; ready Stock must already run in app_0.
     slot=public.get('slot')
-    if (slot!=0 and not (slot==1 and state=='update_available')) or public.get('enhanced_security') is not False or info.get('fw_sbits') not in ('00','01'):
+    if (slot!=0 and not (slot==1 and allow_slot_one)) or public.get('enhanced_security') is not False or info.get('fw_sbits') not in ('00','01'):
         raise TakeoverError('Unsupported active stock slot or security; no upload')
     device_mac=mac(info.get('mac'))
     if mac(public.get('mac'))!=device_mac:raise TakeoverError('Shelly device identity differs between endpoints')
-    StockFirmware.classify(public)
     return public,device_mac
 
 def preflight(http):
-    public,device_mac=stock_state(http)
-    if StockFirmware.classify(public)!='ready':
-        raise TakeoverError('Checked stock update available; run --execute --update-stock to perform it before takeover')
+    _,device_mac=stock_state(http)
     return device_mac
 
 def stock_update_state(http):
-    public,device_mac=stock_state(http)
+    public,device_mac=stock_state(http,allow_slot_one=True)
     status=json.loads(http.request('/rpc/Sys.GetStatus'))
     public=dict(public);public['uptime']=status.get('uptime')
     return public,device_mac
@@ -155,11 +150,11 @@ def main():
     if args.update_stock and not args.execute:raise TakeoverError('--update-stock requires --execute; default checks remain read-only')
     if args.stock_package and not args.update_stock:raise TakeoverError('--stock-package requires --update-stock')
     if not os.environ.get('SHELLY_IP'):raise TakeoverError('Set SHELLY_IP to the fixed station IPv4 address')
-    http=ShellyHttp(os.environ['SHELLY_IP']);public,device_mac=stock_state(http)
-    if StockFirmware.classify(public)=='update_available':
-        if not args.execute:
-            print('Checked official stock update available. Use --execute --update-stock to update, recheck and continue takeover. No device change.');return
-        if not args.update_stock:raise TakeoverError('Stock update required; use --execute --update-stock to allow the checked path')
+    http=ShellyHttp(os.environ['SHELLY_IP'])
+    public,device_mac=stock_state(http,allow_slot_one=args.update_stock)
+    if args.update_stock:
+        if StockFirmware.classify(public)!='update_available':
+            raise TakeoverError('The optional stock update is only available from a supported factory build')
         # A missing/invalid Takeover must not be discovered after changing stock.
         validate(ROOT/'generated/ShellyTakeover/App/PlugMG3-ShellyTakeover.zip')
         image=StockFirmware.prepare(args.stock_package)

@@ -69,7 +69,7 @@ This is an independent recovery path for Main and the filesystem. A damaged boot
 - Supported source device on the home network; reserve a fixed IPv4 address in DHCP.
 - Matching WLAN configuration and a private signing key pair outside the project.
 
-Shelly source: Plug M Gen3 / S3PL-30110EU, ESP32-C3 revision 4, 8 MiB. The PC preflight accepts the listed PlugMG3 2.0.0, 2.0.1, 2.1.0 and 2.2.0 builds in `app_0`. See [StockUpdatePolicy.json](ShellyTakeover/StockUpdatePolicy.json) for exact build IDs. Takeover checks the on-device partition table and loader before writing. Nous source: A8T with the matching Tasmota partition table described in [AppRequirements.md](AppRequirements.md).
+Shelly source: Plug M Gen3 / S3PL-30110EU, ESP32-C3 revision 4, 8 MiB. The PC preflight checks the model, security state and active Stock slot `app_0`. Takeover checks the on-device partition table and loader before writing. Nous source: A8T with the matching Tasmota partition table described in [AppRequirements.md](AppRequirements.md).
 
 The PC may use Ethernet. For Shelly, the device must also be able to reach the PC’s local OTA HTTP server. Takeover and Rescue use DHCP; the router reservation keeps their address stable.
 
@@ -184,7 +184,7 @@ python3 tools/ShellyTakeover.py
 python3 tools/NousTakeover.py
 ```
 
-The Shelly check requires the model and supported security setting above. Stock must be running in slot 0 for Takeover. The known factory build may run in slot 1 before its prerequisite stock update; slot 0 is checked again as mandatory after the update. For the known factory build `1.8.99-plugmg3prod0` / `20251209-070625/geeb7eab`, it offers a verified update to the exact stock build 2.2.0. Without a write option it performs neither download nor update. Unknown intermediate states, other builds, and downgrades are rejected. The Nous check requires the known Tasmota version/build from [NousTakeover/README.md](NousTakeover/README.md), 4 MiB flash, active A8T GPIO template, LAN address, and SafeBoot/file upload path. Takeover then checks the original bootloader and partition table directly on the device.
+Stock must be running in `app_0` for direct takeover. The Shelly PC check accepts any Stock version and build ID. Layout compatibility is checked on the device after Takeover starts. The default command is read-only. The Nous check requires the known Tasmota version/build from [NousTakeover/README.md](NousTakeover/README.md), 4 MiB flash, active A8T GPIO template, LAN address, and SafeBoot/file upload path. Takeover then checks the original bootloader and partition table directly on the device.
 
 The following command modifies the device and starts takeover. Use it only after reviewing the device deployment for the intended version; the development status above currently applies. First ensure stable power and disconnect attached loads:
 
@@ -194,7 +194,7 @@ python3 tools/ShellyTakeover.py --execute
 python3 tools/NousTakeover.py --execute
 ```
 
-If the known factory update is needed, use this command instead under the same prerequisites and device approval:
+The known factory build (`1.8.99-plugmg3prod0` / `20251209-070625/geeb7eab`) can optionally be updated to the verified 2.2.0 Stock package before takeover:
 
 ```bash
 python3 tools/ShellyTakeover.py --execute --update-stock
