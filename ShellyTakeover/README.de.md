@@ -46,7 +46,7 @@ Vor dem nächsten Befehl stabile Stromversorgung sicherstellen und angeschlossen
 python3 tools/ShellyTakeover.py --execute
 ```
 
-Das Skript prüft das ZIP, stellt es vorübergehend per HTTP vom PC bereit und fordert einmal `Shelly.Update` an. Der Shelly lädt das Paket herunter; das Skript wartet auf den anschließenden Rescue-Status und prüft ihn. PC und Skript bis zum Abschluss laufen lassen. Vor der Übernahme ist ein [optionales Stock-Update](../README.de.md#pc-vorprüfung-und-übernahme).
+Das Skript prüft das ZIP, stellt es vorübergehend per HTTP vom PC bereit und fordert einmal `Shelly.Update` an. Der Shelly lädt das Paket herunter; das Skript wartet auf den anschließenden Rescue-Status und prüft ihn. PC und Skript bis zum Abschluss laufen lassen. Vor der Übernahme ist ein [optionales Stock-Update](../README.de.md#pc-vorprüfung-und-übernahme) möglich.
 
 Die App wartet nach AP+STA/Webstart auf eine LAN-IP und beginnt danach selbständig
 mit ihren Guards und der Übernahme. Das Paket deshalb noch nicht für einen
