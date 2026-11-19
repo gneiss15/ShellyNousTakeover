@@ -274,41 +274,13 @@ python3 tools/ShellyTakeover.py --execute
 python3 tools/NousTakeover.py --execute
 ```
 
-Der bekannte Factory-Build (`1.8.99-plugmg3prod0` / `20251209-070625/geeb7eab`)
-kann optional vor der Übernahme auf das verifizierte Stock-Paket 2.2.0 aktualisiert werden:
+Wer zuerst die aktuelle stabile Stock-Firmware installieren möchte, kann das normale Shelly-Update verwenden oder es über das Skript anstoßen.
 
 ```bash
 python3 tools/ShellyTakeover.py --execute --update-stock
 ```
 
-Dieser Aufruf prüft zuerst die gebaute Takeover, beschafft und prüft das festgelegte
-offizielle Stock-Paket, aktualisiert einmalig und bestätigt dieselbe Geräte-MAC sowie
-die exakte Zielversion samt Build. Anschließend muss das Gerät 120 Sekunden lang
-in app_0 erreichbar bleiben und eine fortschreitende Laufzeit melden. Neustart,
-fehlende Laufzeit oder fehlgeschlagene Abfrage setzen die Beobachtung zurück; nach
-420 Sekunden wird abgebrochen. Dies ist eine Stabilitätsprüfung, kein ausgelesener
-Hersteller-Commit-Status. Danach werden Slot/Security und die übrigen
-Takeover-Voraussetzungen erneut geprüft, bevor der Takeover-Upload startet. Ein
-fehlgeschlagenes oder unbestätigtes Stock-Update verhindert die Takeover.
-
-Das offizielle Stock-Paket kann vorab ohne Geräteanfrage vorbereitet werden:
-
-```bash
-python3 tools/StockFirmware.py
-```
-
-Es liegt danach im ignorierten `generated/StockFirmware/`. Der Downloader verwendet
-die öffentliche Allterco-CA unter `tools/certificates/Allterco.crt`, extrahiert aus
-`shelly_cloud.pem` eines bestätigten Originalgeräte-Dumps. Herkunft und Identität
-sind in `Allterco.json` dokumentiert. Die CA gilt nur für diesen Downloadpfad;
-der System-/Browser-Zertifikatsspeicher wird nicht geändert. HTTPS-Zertifikate bleiben
-geprüft; es gibt keinen HTTP-/TLS-Unsicherheitsfallback. Bei nicht prüfbarer
-Zertifikatskette wird der Download abgebrochen. Alternativ ein bereits vorhandenes
-offizielles Zielpaket angeben; auch dieses wird vollständig validiert:
-
-```bash
-python3 tools/ShellyTakeover.py --execute --update-stock --stock-package /path/to/PlugMG3-2.2.0.zip
-```
+Das Skript fragt das Stable-Angebot am Gerät ab und nutzt Shellys Stable-Kanal. Danach wartet es, bis dasselbe Gerät den angebotenen Build 120 Sekunden lang in `app_0` mit fortschreitender Laufzeit meldet. Meldet Shelly kein Stable-Update, bleibt Stock unverändert und das Skript führt die normale Vorprüfung aus. Ob das Layout passt, prüft Takeover vor dem Schreiben direkt am Gerät. [Shelly-Dokumentation zu Firmware-Updates](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Shelly/)
 
 Shelly: Das Skript stellt ausschließlich das gebaute OTA-Paket an einem lokalen
 HTTP-Port bereit und sendet einmal Shelly.Update. Die passende LAN-Adresse des PCs

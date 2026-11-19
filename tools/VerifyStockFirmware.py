@@ -13,8 +13,9 @@ import StockFirmware as stock
 from NousTakeover import TakeoverError
 
 POLICY=stock.policy()
+OFFER={'version':'2.2.1','build_id':'future-stable'}
 def public(ready=False):
-    source=POLICY['target'] if ready else POLICY['allowed_sources'][0]
+    source=OFFER if ready else POLICY['allowed_sources'][0]
     return {'model':POLICY['model'],'app':POLICY['app'],'ver':source['version'],'fw_id':source['build_id']}
 class Clock:
     value=0
@@ -22,50 +23,48 @@ class Clock:
     def sleep(self,n):self.value+=n
 class Http:
     base='http://192.0.2.10'
-    def __init__(self):self.writes=0;self.fail=False;self.reject=False
+    def __init__(self):self.writes=0;self.fail=False;self.reject=False;self.offers={'stable':OFFER}
     def request(self,path,**kwargs):
+        if path=='/rpc/Shelly.CheckForUpdate':return json.dumps(self.offers).encode()
         assert path=='/rpc';self.writes+=1
-        value=json.loads(kwargs['data']);assert value['method']=='Shelly.Update'
+        value=json.loads(kwargs['data']);assert value['method']=='Shelly.Update' and value['params']=={'stage':'stable'}
         if self.fail:raise urllib.error.URLError('reply lost')
         return json.dumps({'error':{}} if self.reject else {'result':{}}).encode()
-class Server:
-    def __init__(self,*args):self.downloaded=True;self.server=type('Listener',(),{'server_address':('0.0.0.0',12345)})()
-    def __enter__(self):return self
-    def __exit__(self,*args):pass
 class Test(unittest.TestCase):
-    def test_classification(self):
-        self.assertEqual(stock.classify(public()),'update_available');self.assertEqual(stock.classify(public(True)),'ready')
-        for change in [{'ver':'3.0.0'},{'fw_id':'unknown'},{'model':'other'},{'ver':'1.0.0'}]:
-            value=public();value.update(change)
-            with self.assertRaises(TakeoverError):stock.classify(value)
     def test_update_once(self):
         for lost in [False,True]:
             h=Http();h.fail=lost
-            wait=lambda read,m:self.assertEqual(m,'020000000001')
-            with patch.object(stock,'validate_package'):
-                stock.update(h,'020000000001',Path('unused'),lambda:(public(),'020000000001'),Server,lambda ip:'192.0.2.20',wait=wait)
+            wait=lambda read,m,target:self.assertEqual((m,target),('020000000001',OFFER))
+            stock.update(h,'020000000001',lambda:(public(),'020000000001'),wait=wait)
             self.assertEqual(h.writes,1)
     def test_no_write_on_denial(self):
-        for read in [lambda:(public(),'other'),lambda:({'model':'unknown'},'020000000001')]:
-            h=Http()
-            with patch.object(stock,'validate_package'):
-                with self.assertRaises(TakeoverError):stock.update(h,'020000000001',Path('unused'),read,Server,lambda ip:'192.0.2.20')
-            self.assertEqual(h.writes,0)
+        h=Http()
+        with self.assertRaises(TakeoverError):
+            stock.update(h,'020000000001',lambda:(public(),'other'))
+        for offers in ({'error':{}},{'stable':{'version':'2.2.1'}}):
+            h.offers=offers
+            with self.assertRaises(TakeoverError):
+                stock.update(h,'020000000001',lambda:(public(),'020000000001'))
+        self.assertEqual(h.writes,0)
+    def test_beta_only_leaves_stock_unchanged(self):
+        h=Http();h.offers={'beta':OFFER}
+        stock.update(h,'020000000001',lambda:(public(),'020000000001'))
+        self.assertEqual(h.writes,0)
     def test_rejected_rpc(self):
         h=Http();h.reject=True
-        with patch.object(stock,'validate_package'):
-            with self.assertRaises(TakeoverError):stock.update(h,'020000000001',Path('unused'),lambda:(public(),'020000000001'),Server,lambda ip:'192.0.2.20',wait=lambda *args:self.fail('must not monitor rejected RPC'))
+        with self.assertRaises(TakeoverError):
+            stock.update(h,'020000000001',lambda:(public(),'020000000001'),wait=lambda *args:self.fail('must not monitor rejected RPC'))
         self.assertEqual(h.writes,1)
     def test_wait_target(self):
         clock=Clock()
         def read():
             value=public(clock.value>=2);value.update(slot=0,uptime=max(0,clock.value-2))
             return value,'020000000001'
-        stock.wait_target(read,'020000000001',clock=clock.now,sleep=clock.sleep)
+        stock.wait_target(read,'020000000001',OFFER,clock=clock.now,sleep=clock.sleep)
         self.assertEqual(clock.value,122)
-        with self.assertRaises(TakeoverError):stock.wait_target(lambda:(public(True),'other'),'020000000001')
+        with self.assertRaises(TakeoverError):stock.wait_target(lambda:(public(True),'other'),'020000000001',OFFER)
         clock=Clock()
-        with self.assertRaises(TakeoverError):stock.wait_target(lambda:(public(),'020000000001'),'020000000001',timeout=3,clock=clock.now,sleep=clock.sleep)
+        with self.assertRaises(TakeoverError):stock.wait_target(lambda:(public(),'020000000001'),'020000000001',OFFER,timeout=3,clock=clock.now,sleep=clock.sleep)
     def test_readiness_resets(self):
         for event in ['restart','network','old_build','wrong_slot']:
             clock=Clock()
@@ -78,13 +77,13 @@ class Test(unittest.TestCase):
                     if event=='wrong_slot':value['slot']=1
                 if event=='restart' and clock.value>60:value['uptime']=clock.value-60
                 return value,'020000000001'
-            stock.wait_target(read,'020000000001',clock=clock.now,sleep=clock.sleep)
+            stock.wait_target(read,'020000000001',OFFER,clock=clock.now,sleep=clock.sleep)
             self.assertEqual(clock.value,180 if event=='restart' else 182)
     def test_invalid_uptime_never_ready(self):
         for uptime in [None,True,-1,'120',120]:
             clock=Clock();value=public(True);value.update(slot=0,uptime=uptime)
             with self.assertRaises(TakeoverError):
-                stock.wait_target(lambda:(value,'020000000001'),'020000000001',timeout=125,clock=clock.now,sleep=clock.sleep)
+                stock.wait_target(lambda:(value,'020000000001'),'020000000001',OFFER,timeout=125,clock=clock.now,sleep=clock.sleep)
     def test_existing_file_is_verified(self):
         with patch.object(stock,'validate_package') as validate:
             self.assertEqual(stock.prepare(Path('existing.zip')),Path('existing.zip'));validate.assert_called_once_with(Path('existing.zip'))
@@ -110,10 +109,9 @@ class Test(unittest.TestCase):
     def test_older_ready_is_not_update_confirmation(self):
         old=POLICY['accepted_stock'][0]
         value={'model':POLICY['model'],'app':POLICY['app'],'ver':old['version'],'fw_id':old['build_id']}
-        self.assertEqual(stock.classify(value),'ready')
         clock=Clock()
         with self.assertRaises(TakeoverError):
-            stock.wait_target(lambda:(value,'020000000001'),'020000000001',timeout=3,clock=clock.now,sleep=clock.sleep)
+            stock.wait_target(lambda:(value,'020000000001'),'020000000001',OFFER,timeout=3,clock=clock.now,sleep=clock.sleep)
     def test_public_ca(self):
         context=stock.download_context()
         import ssl

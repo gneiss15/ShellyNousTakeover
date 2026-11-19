@@ -42,6 +42,6 @@ Before the next command, ensure stable power and disconnect attached loads. This
 python3 tools/ShellyTakeover.py --execute
 ```
 
-The script validates the ZIP, serves it temporarily from the PC over HTTP, and requests `Shelly.Update` once. The Shelly downloads the package; the script waits for and verifies the resulting Rescue status. Keep the PC/script running until completion. For the known factory build, see the [optional stock-update instructions](../README.md#pc-precheck-and-takeover).
+The script validates the ZIP, serves it temporarily from the PC over HTTP, and requests `Shelly.Update` once. The Shelly downloads the package; the script waits for and verifies the resulting Rescue status. Keep the PC/script running until completion. To update Stock through the stable channel first, see the [optional stock-update instructions](../README.md#pc-precheck-and-takeover).
 
 After starting AP+STA/web, the app waits for a LAN IP and then begins its guards and takeover automatically. Do not use the package on unverified hardware. Development status: [main README](../README.md).

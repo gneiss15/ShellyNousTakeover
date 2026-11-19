@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         target=pc.StockFirmware.policy()['target'];h.public.update(ver=target['version'],fw_id=target['build_id'])
         self.assertEqual(pc.preflight(h),'020000000001');self.assertEqual(h.writes,0)
         h.public.update(ver='future',fw_id='unlisted')
-        with patch.object(pc.StockFirmware,'classify',side_effect=AssertionError('Stock policy consulted')):
+        with patch.object(pc.StockFirmware,'policy',side_effect=AssertionError('Stock policy consulted')):
             self.assertEqual(pc.preflight(h),'020000000001')
             del h.public['ver'], h.public['fw_id']
             self.assertEqual(pc.preflight(h),'020000000001')
@@ -106,9 +106,9 @@ class Test(unittest.TestCase):
             def update(*args):
                 if outcome=='failed':raise pc.TakeoverError('stock update failed')
                 if outcome!='still_old':
-                    target=pc.StockFirmware.policy()['target'];h.public.update(ver=target['version'],fw_id=target['build_id'],slot=0)
+                    h.public.update(ver='2.2.1',fw_id='future-stable',slot=0)
                 if outcome=='wrong_mac':h.public['mac']=h.info['mac']='020000000002'
-            with patch.dict(os.environ,{'SHELLY_IP':'192.0.2.10'}),patch.object(sys,'argv',['ShellyTakeover.py','--execute','--update-stock']),patch.object(pc,'ShellyHttp',return_value=h),patch.object(pc,'validate'),patch.object(pc.StockFirmware,'prepare',return_value=Path('stock.zip')),patch.object(pc.StockFirmware,'update',side_effect=update),patch.object(pc,'execute') as takeover:
+            with patch.dict(os.environ,{'SHELLY_IP':'192.0.2.10'}),patch.object(sys,'argv',['ShellyTakeover.py','--execute','--update-stock']),patch.object(pc,'ShellyHttp',return_value=h),patch.object(pc,'validate'),patch.object(pc.StockFirmware,'update',side_effect=update),patch.object(pc,'execute') as takeover:
                 if outcome=='ok':pc.main();takeover.assert_called_once()
                 else:
                     with self.assertRaises(pc.TakeoverError):pc.main()

@@ -144,21 +144,16 @@ def execute(http,expected_mac,image):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--execute',action='store_true',help='serve package, request manufacturer OTA once and verify Rescue')
-    parser.add_argument('--update-stock',action='store_true',help='allow the pinned official stock update before takeover; requires --execute')
-    parser.add_argument('--stock-package',type=Path,help='use an existing official package after full identity/layout validation')
+    parser.add_argument('--update-stock',action='store_true',help='install the stable stock update offered by Shelly before takeover; requires --execute')
     args=parser.parse_args()
     if args.update_stock and not args.execute:raise TakeoverError('--update-stock requires --execute; default checks remain read-only')
-    if args.stock_package and not args.update_stock:raise TakeoverError('--stock-package requires --update-stock')
     if not os.environ.get('SHELLY_IP'):raise TakeoverError('Set SHELLY_IP to the fixed station IPv4 address')
     http=ShellyHttp(os.environ['SHELLY_IP'])
-    public,device_mac=stock_state(http,allow_slot_one=args.update_stock)
+    _,device_mac=stock_state(http,allow_slot_one=args.update_stock)
     if args.update_stock:
-        if StockFirmware.classify(public)!='update_available':
-            raise TakeoverError('The optional stock update is only available from a supported factory build')
         # A missing/invalid Takeover must not be discovered after changing stock.
         validate(ROOT/'generated/ShellyTakeover/App/PlugMG3-ShellyTakeover.zip')
-        image=StockFirmware.prepare(args.stock_package)
-        StockFirmware.update(http,device_mac,image,lambda:stock_update_state(http),FirmwareServer,pc_address)
+        StockFirmware.update(http,device_mac,lambda:stock_update_state(http))
     if preflight(http)!=device_mac:raise TakeoverError('Device identity changed before takeover')
     print('Shelly stock/model/slot/security preflight passed; real flash/loader guards run inside Takeover.')
     if not args.execute:print('Read-only check completed; no upload.');return

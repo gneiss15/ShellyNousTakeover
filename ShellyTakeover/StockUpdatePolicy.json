@@ -14,7 +14,7 @@
     }
   ],
   "downgrade_supported": false,
-  "scope": "Optional pinned factory update to 2.2.0. These identities apply to the update workflow only. Hardware verification of the 2.2.0 path is pending.",
+  "scope": "Archive reference for validating the official 2.2.0 package. Live updates use Shelly’s stable channel.",
   "accepted_stock": [
     {
       "version": "2.0.0",

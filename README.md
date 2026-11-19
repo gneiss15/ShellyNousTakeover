@@ -194,25 +194,13 @@ python3 tools/ShellyTakeover.py --execute
 python3 tools/NousTakeover.py --execute
 ```
 
-The known factory build (`1.8.99-plugmg3prod0` / `20251209-070625/geeb7eab`) can optionally be updated to the verified 2.2.0 Stock package before takeover:
+If you want to install the current stable Stock firmware first, use Shelly’s normal firmware update or request it through the takeover script:
 
 ```bash
 python3 tools/ShellyTakeover.py --execute --update-stock
 ```
 
-This command first checks the built Takeover, obtains and verifies the specified official stock package, performs the one-time update, and confirms the same device MAC and exact target version/build. The device must then remain reachable in app_0 for 120 seconds and report advancing uptime. A reboot, missing uptime, or failed query resets the observation; it aborts after 420 seconds. This is a stability check, not a readout of manufacturer commit status. Slot/security and the remaining takeover prerequisites are checked again before Takeover upload starts. A failed or unconfirmed stock update prevents takeover.
-
-The official stock package can be prepared in advance without contacting a device:
-
-```bash
-python3 tools/StockFirmware.py
-```
-
-It is stored in ignored `generated/StockFirmware/`. The downloader uses the public Allterco CA at `tools/certificates/Allterco.crt`, extracted from `shelly_cloud.pem` in a confirmed original-device dump. Origin and identity are documented in `Allterco.json`. The CA is used only for this download path; the system/browser certificate store is not changed. HTTPS certificates remain checked; there is no HTTP/TLS-insecure fallback. Download aborts if the certificate chain cannot be verified. Alternatively, supply an existing official target package; it is fully validated too:
-
-```bash
-python3 tools/ShellyTakeover.py --execute --update-stock --stock-package /path/to/PlugMG3-2.2.0.zip
-```
+The script checks the stable offer on the device and uses Shelly’s stable update channel. It waits for the same device to run the offered build in `app_0` for 120 seconds with advancing uptime. If Shelly offers no stable update, the script applies no Stock update and runs the normal takeover preflight. Takeover checks the actual layout on the device before writing. See [Shelly’s firmware RPC documentation](https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Shelly/).
 
 Shelly: the script serves only the built OTA package on a local HTTP port and sends Shelly.Update once. It automatically selects the suitable PC LAN address; on multiple networks, `TAKEOVER_HTTP_HOST` can set the reachable IPv4 address. The firewall must allow the port selected by the script. Nous: the script first switches to SafeBoot and confirms that state, then uploads the Takeover file once. It does not upload to normal Main.
 

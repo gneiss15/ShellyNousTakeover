@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # StockFirmware.py, Version: 1.03
-"""Pinned stock package preparation and same-device update checks; no firmware guessing."""
+"""Use Shelly’s stable update channel or validate the archived reference package."""
 import hashlib
 import json
 from pathlib import Path
@@ -27,15 +27,6 @@ def policy():
         raise TakeoverError('Pinned stock download URL is invalid')
     if value.get('downgrade_supported') is not False:raise TakeoverError('No checked downgrade policy is available')
     return value
-
-def classify(public):
-    value=policy()
-    if public.get('model')!=value['model'] or public.get('app')!=value['app']:raise TakeoverError('Unsupported stock device model')
-    actual=(public.get('ver'),public.get('fw_id'))
-    accepted=[value['target']]+value.get('accepted_stock',[])
-    if any(actual==(item['version'],item['build_id']) for item in accepted):return 'ready'
-    if any(actual==(s['version'],s['build_id']) for s in value['allowed_sources']):return 'update_available'
-    raise TakeoverError('Unknown stock version/build; no inferred update or downgrade')
 
 def validate_package(image):
     subprocess.run([sys.executable,str(ROOT/'tools/stock/ValidateFirmwareLayout.py'),str(image),str(LAYOUT)],check=True)
@@ -87,16 +78,14 @@ def prepare(image=None,opener=None):
     print('Pinned stock package downloaded and verified; no device change.')
     return image
 
-def wait_target(read_stock,expected_mac,timeout=420,clock=time.monotonic,sleep=time.sleep,stable_seconds=120):
+def wait_target(read_stock,expected_mac,target,timeout=420,clock=time.monotonic,sleep=time.sleep,stable_seconds=120):
     deadline=clock()+timeout
     stable_since=None;previous_uptime=None
-    target=policy()['target']
     while clock()<deadline:
         try:public,current_mac=read_stock()
         except (urllib.error.URLError,TimeoutError,OSError,json.JSONDecodeError):
             stable_since=None;previous_uptime=None;sleep(2);continue
         if current_mac!=expected_mac:raise TakeoverError('Different device MAC after stock update; takeover blocked')
-        classify(public)
         uptime=public.get('uptime')
         ready=((public.get('ver'),public.get('fw_id'))==(target['version'],target['build_id'])
             and public.get('slot')==0 and type(uptime) is int and uptime>=0)
@@ -109,27 +98,36 @@ def wait_target(read_stock,expected_mac,timeout=420,clock=time.monotonic,sleep=t
             previous_uptime=uptime
             if clock()-stable_since>=stable_seconds and uptime>=stable_seconds:return
         sleep(2)
-    raise TakeoverError('Pinned stock target not continuously stable in app_0; no retry update or takeover')
+    raise TakeoverError('Offered stock build not continuously stable in app_0; no retry update or takeover')
 
-def update(http,expected_mac,image,read_stock,server_factory,local_address,wait=wait_target):
-    validate_package(image)
-    public,current_mac=read_stock()
+def update(http,expected_mac,read_stock,wait=wait_target):
+    _,current_mac=read_stock()
     if current_mac!=expected_mac:raise TakeoverError('Device identity changed; no stock update')
-    state=classify(public)
-    if state=='ready':return
-    ip=http.base.removeprefix('http://')
-    with server_factory(ip,image) as server:
-        url='http://'+local_address(ip)+':'+str(server.server.server_address[1])+'/Takeover.zip'
-        payload=json.dumps({'id':1,'method':'Shelly.Update','params':{'url':url}},separators=(',',':')).encode()
-        print('Sending the verified official stock update once; takeover waits for exact target and 120 seconds of stable app_0 uptime.',flush=True)
-        try:
-            reply=json.loads(http.request('/rpc',data=payload,headers={'Content-Type':'application/json'},timeout=30))
-            if not isinstance(reply,dict) or reply.get('error') is not None:raise TakeoverError('Official stock update rejected; no takeover')
-        except (urllib.error.URLError,TimeoutError,OSError,json.JSONDecodeError):
-            print('Stock update reply unavailable; verifying without a second write.',flush=True)
-        wait(read_stock,expected_mac)
-        if not server.downloaded:raise TakeoverError('Stock target observed without a confirmed package transfer; takeover blocked')
-    print('Same device confirmed on the exact stock target; takeover prerequisites will be checked again.')
+    offers=json.loads(http.request('/rpc/Shelly.CheckForUpdate'))
+    if not isinstance(offers,dict) or 'error' in offers:
+        raise TakeoverError('Could not check the official stable stock channel')
+    target=offers.get('stable')
+    if target is None:
+        print('Shelly reports no stable stock update.',flush=True)
+        return
+    if not isinstance(target,dict) or any(
+        not isinstance(target.get(key),str) or not target[key] for key in ('version','build_id')
+    ):
+        raise TakeoverError('Invalid stable stock offer; no update')
+    _,current_mac=read_stock()
+    if current_mac!=expected_mac:raise TakeoverError('Device identity changed; no stock update')
+    payload=json.dumps({'id':1,'method':'Shelly.Update','params':{'stage':'stable'}}).encode()
+    print('Requesting the official Shelly stable update once.',flush=True)
+    try:
+        reply=json.loads(http.request('/rpc',data=payload,headers={'Content-Type':'application/json'},timeout=30))
+        if not isinstance(reply,dict) or reply.get('error') is not None:
+            raise TakeoverError('Official stock update rejected; no takeover')
+    except urllib.error.HTTPError as error:
+        raise TakeoverError('Official stock update rejected; HTTP status '+str(error.code)) from None
+    except (urllib.error.URLError,TimeoutError,OSError,json.JSONDecodeError):
+        print('Stock update reply unavailable; verifying without a second write.',flush=True)
+    wait(read_stock,expected_mac,target)
+    print('Same device confirmed on the offered stable build in app_0.',flush=True)
 
 if __name__=='__main__':
     try:prepare()
